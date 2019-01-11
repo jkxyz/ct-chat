@@ -1,0 +1,176 @@
+* XMPP Core
+
+** Architecture
+
+> XMPP provides a technology for the asynchronous, end-to-end exchange of
+> structured data by means of direct, persistent XML streams among a distributed
+> network of globally adressable, presence-aware clients and servers.
+
+ACT = Availability for Concurrent Transactions
+
+** Global Addresses
+
+- Server address
+  e.g. <im.example.com>
+
+- Accounts hosted at a server
+  e.g. <juliet@im.example.com>
+  (*Bare JID*)
+
+- Connected device authorized for an account
+  e.g. <juliet@im.example.com/balcony>
+  (*Full JID*)
+
+** Presence
+
+Presence is signalled by the `<presence/>` stanza.
+
+** Persistent Streams
+
+Each client-to-server and server-to-server connection is a long-lived TCP
+connection allowing parties to push data to another party or immediate
+routing or delivery.
+
+** Structured Data
+
+The basic data unit is an XML stanza: a fragment of XML sent over an XML stream.
+
+The root element includes routing attributes (from and to addresses) and the
+child elements contain a payload for delivery.
+
+** Distributed Network of Clients and Servers
+
+Communication in XMPP is logically peer-to-peer but physically
+client-to-server-to-client.
+
+** XML Streams
+
+*** Streams
+
+> An XML stream is a container for the exchange of XML elements between any
+> two entities over a network.
+
+Stream is opened by a *stream header*: <stream>
+Stream is closed by a closing </stream> tag.
+
+A stream is *unidirectional*: in order to exchange stanzas the entity must
+negotiate a *response stream* in the opposite direction.
+
+*** Stanzas
+
+Basic unit of meaning in XMPP.
+
+A stanza is a first-level element whose element name is:
+
+- message
+- presence
+- iq
+
+And whose qualifying namespace is jabber:client or jabber:server.
+
+The three stanza types provide three communication primitives:
+- message = push for general messaging
+- presence = pub/sub for broadcasting network availability
+- iq = info/query, a request/response mechanism
+
+| INITIAL STREAM                        | RESPONSE STREAM                            |
+|---------------------------------------+--------------------------------------------|
+| <stream>                              |                                            |
+|---------------------------------------+--------------------------------------------|
+|                                       | <stream>                                   |
+|---------------------------------------+--------------------------------------------|
+| <presence><show/></presence>          |                                            |
+|---------------------------------------+--------------------------------------------|
+| <message to='foo'><body/></message>   |                                            |
+|---------------------------------------+--------------------------------------------|
+| <iq to='bar' type='get'><query/></iq> |                                            |
+|---------------------------------------+--------------------------------------------|
+|                                       | <iq from='bar' type='result'><query/></iq> |
+|---------------------------------------+--------------------------------------------|
+| [ ... ]                               |                                            |
+|---------------------------------------+--------------------------------------------|
+|                                       | [ ... ]                                    |
+|---------------------------------------+--------------------------------------------|
+| </stream>                             |                                            |
+|---------------------------------------+--------------------------------------------|
+|                                       | </stream>                                  |
+|---------------------------------------+--------------------------------------------|
+
+*** Opening a stream
+
+Initial stream:
+
+#+BEGIN_SRC xml
+  <?xml version='1.0'?>
+  <stream:stream
+      from='juliet@im.example.com'
+      to='im.example.com'
+      version='1.0'
+      xml:lang='en'
+      xmlns='jabber:client'
+      xmlns:stream='http://etherx.jabber.org/streams'>
+#+END_SRC
+
+Response stream:
+
+#+BEGIN_SRC xml
+  <?xml version='1.0'?>
+  <stream:stream
+      from='im.example.com'
+      id='++TR84Sm6A3hnt3Q065SnAbbk3Y='
+      to='juliet@im.example.com'
+      version='1.0'
+      xml:lang='en'
+      xmlns='jabber:client'
+      xmlns:stream='http://etherx.jabber.org/streams'>
+#+END_SRC
+
+*** Stream Negotiation
+
+The server imposes certain conditions for connecting as client.
+The conditions are described by communicating "stream features", some of which
+may be optional. Certain features may only be available after certain
+other features have been negotiated.
+
+**** Stream Features
+
+The server sends a <features/> element after sending the <stream> header.
+
+A <features/> element containing at least one mandatory feature means the
+negotation is not complete. An empty <features/> element or one containing only
+optional features indicates that the negotiation is complete.
+
+Response stream:
+
+#+BEGIN_SRC xml
+  <stream:features>
+      <starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>
+          <required/>
+      </starttls>
+  </stream:features>
+#+END_SRC
+
+If a <features/> element contains more than one required feature, then the
+client can choose between features to negotiate at this stage.
+
+#+BEGIN_SRC xml
+  <stream:features>
+      <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>
+      <compression xmlns='http://jabber.org/features/compress'>
+          <method>zlib</method>
+          <method>lzw</method>
+      </compression>
+  </stream:features>
+#+END_SRC
+
+**** Restarts
+
+When restarting a stream, no closing </stream> tag is sent. A new stream header
+is sent.
+
+**** Determination of Addresses
+
+The client's bare JID is used to authenticate with the server. The full JID is
+negotiated during resource binding.
+
+*** Handling of Silent Peers

@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "mediasoup-client": "^3.1.6",
+    "protoo-client": "^4.0.3",
+    "webpack": "^4.35.2",
+    "webpack-cli": "^3.3.5"
+  }
+}

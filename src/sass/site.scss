@@ -1,0 +1,213 @@
+@import "vendor/normalize";
+
+body {
+  font-family: "Helvetica", sans-serif;
+}
+
+.chat-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-and-roster-container {
+  display: flex;
+  flex-grow: 1;
+}
+
+.messages-container {
+  flex-grow: 1;
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: auto;
+}
+
+.messages-scroll-container {
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  justify-content: end;
+  padding-bottom: 1rem;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.message-container {
+  padding: 0 1rem;
+}
+
+.message-from {
+  font-weight: bold;
+}
+
+.sidebar-container {
+  max-width: 350px;
+  width: 50%;
+  background: #f8f8f8;
+}
+
+.rooms-container {
+  border-bottom: 1px solid #d2d2d2;
+}
+
+.rooms-room {
+  padding: 1rem;
+  font-weight: bold;
+}
+
+.roster-container {
+  padding-top: .5rem;
+}
+
+.roster-user-container {
+  display: flex;
+  align-items: center;
+  padding: .5rem 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #fbfbfb;
+  }
+}
+
+.roster-icon {
+  width: 50px;
+  height: 50px;
+  background: #eaeaea;
+  margin-right: 1rem;
+  border-radius: 999999px;
+}
+
+.profile-container {
+  width: 250px;
+  background: #fbfbfb;
+  position: relative;
+}
+
+.profile-close-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+
+  &:before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    border-left: 1px solid #acabab;
+    height: 28.28px;
+    transform: rotate(45deg);
+    transform-origin: bottom center;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    border-left: 1px solid #acabab;
+    height: 28.28px;
+    transform: rotate(-45deg);
+    transform-origin: top center;
+  }
+}
+
+.profile-image-container {
+  text-align: center;
+  padding-top: 2rem;
+}
+
+.profile-image {
+  display: inline-block;
+  width: 175px;
+  height: 175px;
+  border-radius: 999999px;
+  background: #eaeaea;
+}
+
+.input-container {
+  height: 50px;
+  border-top: 1px solid #d2d2d2;
+}
+
+.input {
+  border: none;
+  width: 100%;
+  height: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.chat-tabs-container {
+  background: #eaeaea;
+  overflow: hidden;
+}
+
+.chat-tab {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  border-right: 1px solid #c2c2c2;
+  font-weight: bold;
+
+  &.active {
+    background: white;
+    cursor: auto;
+    box-shadow: 0 0 5px #c2c2c2;
+    border: none;
+  }
+}
+
+.broadcast-container {
+  padding: 1rem 1rem .5rem 1rem;
+}
+
+.broadcast-button {
+  width: 100%;
+  display: inline-block;
+  padding: .5rem 0;
+  text-align: center;
+  background-color: #d2d2d2;
+  border-radius: 3px;
+  color: #333;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+
+  &:disabled {
+    background-color: #eaeaea;
+    color: #aaa;
+    cursor: initial;
+  }
+}
+
+.stop-broadcasting-button {
+  width: 100%;
+  display: inline-block;
+  padding: .5rem 0;
+  text-align: center;
+  background-color: #d2d2d2;
+  border-radius: 3px;
+  color: #333;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.webcams-container {
+  position: absolute;
+  padding: 1rem;
+}
+
+.webcam {
+  width: 350px;
+}
+
+.webcam-video {
+  width: 100%;
+}

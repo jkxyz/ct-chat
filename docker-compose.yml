@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+
+  ejabberd:
+    image: ejabberd/ecs
+    ports:
+      - "5222:5222"
+      - "5280:5280"
+      - "5443:5443"
+    volumes:
+      - "./docker/ejabberd.yml:/home/ejabberd/conf/ejabberd.yml"
+
+  postgres:
+    build: ./docker/postgres/
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ejabberd
+
+  mediasoup:
+    build: ./mediasoup-server/
+    environment:
+      - "DEBUG=mediasoup*"
+      - "MEDIASOUP_TRANSPORT_ANNOUNCED_IP"
+    ports:
+      - "3500:3500"
+      - "10000-10100:10000-10100"

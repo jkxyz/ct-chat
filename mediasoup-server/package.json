@@ -1,0 +1,8 @@
+{
+    "private": true,
+    "dependencies": {
+        "express": "4.17.1",
+        "protoo-server": "4.0.3",
+        "uuid": "3.3.2"
+    }
+}
