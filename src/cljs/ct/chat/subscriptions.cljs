@@ -3,8 +3,12 @@
    [re-frame.core :as rf]))
 
 (rf/reg-sub
- ::profile
- (fn [{:profile/keys [open? chat-jid occupant-jid]}]
+ ::profile-panel
+ (fn [{:profile-panel/keys [open? chat-jid occupant-jid]
+       :rooms/keys [occupants]}]
    (when open?
-     {:chat-jid chat-jid
-      :occupant-jid occupant-jid})))
+     (let [{:keys [nickname affiliation role]}
+           (get-in occupants [chat-jid occupant-jid])]
+       {:nickname nickname
+        :affiliation affiliation
+        :role role}))))

@@ -31,11 +31,20 @@
 (rf/reg-event-fx
  ::roster-user-clicked
  (fn [{:keys [db]} [_ {:keys [occupant-jid]}]]
-   (let [{:chats/keys [active-chat-jid]} db]
+   (let [{:chats/keys [active-chat-jid]
+          :profile-panel/keys [open?]
+          previous-occupant-jid :profile-panel/occupant-jid}
+         db]
      {:db (assoc db
-                 :profile/open? true
-                 :profile/chat-jid active-chat-jid
-                 :profile/occupant-jid occupant-jid)})))
+                 :profile-panel/open?
+                 (or (not open?) (not= previous-occupant-jid occupant-jid))
+                 :profile-panel/chat-jid active-chat-jid
+                 :profile-panel/occupant-jid occupant-jid)})))
+
+(rf/reg-event-fx
+ ::profile-panel-close-button-clicked
+ (fn [{:keys [db]} _]
+   {:db (assoc db :profile-panel/open? false)}))
 
 (rf/reg-event-fx
  ::chat-tab-clicked

@@ -1,5 +1,6 @@
 (ns ct.chat.views
   (:require
+   [clojure.string :as string]
    [re-frame.core :as rf]
    [reagent.core :as reagent]
    [ct.chat.media.device :refer [consumers]]
@@ -139,16 +140,26 @@
        (for [consumer-id @consumer-ids]
          ^{:key consumer-id} [webcam {:consumer-id consumer-id}])])))
 
-(defn profile []
-  (let [profile (rf/subscribe [::subs/profile])
+(defn profile-panel []
+  (let [profile-panel (rf/subscribe [::subs/profile-panel])
         handle-close-button-click
-        #(rf/dispatch [::events/profile-close-button-clicked])]
+        #(rf/dispatch [::events/profile-panel-close-button-clicked])]
     (fn []
-      (when @profile
+      (when-let [{:keys [nickname affiliation role]} @profile-panel]
         [:div.profile-container
          [:div.profile-close-button {:on-click handle-close-button-click}]
          [:div.profile-image-container
-          [:div.profile-image]]]))))
+          [:div.profile-image]]
+         [:a.profile-link-button
+          "View Profile"]
+         [:div.profile-details
+          (when-not (= :none affiliation)
+            [:div.profile-detail
+             [:div.profile-detail-title "Affiliation"]
+             [:div.profile-detail-value (string/capitalize (name affiliation))]])
+          [:div.profile-detail
+           [:div.profile-detail-title "Role"]
+           [:div.profile-detail-value (string/capitalize (name role))]]]]))))
 
 (defn app []
   (let [active-chat (rf/subscribe [::chats.subs/active-chat])]
@@ -158,7 +169,7 @@
        [chat-tabs]
        [:div.messages-and-roster-container
         [autoscrolling-messages]
-        [profile]
+        [profile-panel]
         (when (= :groupchat (:type @active-chat))
           [sidebar])]
        [input]])))
