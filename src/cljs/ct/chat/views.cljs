@@ -35,13 +35,18 @@
          [:div.rooms-room {:key room} room])
        [:div.rooms-room "Loading rooms..."]))])
 
-(defn- roster-user [{:keys [occupant-jid]}]
-  (let [handle-click #(rf/dispatch [::events/roster-user-clicked
-                                    {:occupant-jid occupant-jid}])]
+(def crown-emoji "👑")
+
+(defn- roster-user [{:keys [occupant-jid affiliation]}]
+  (let [handle-click
+        #(rf/dispatch [::events/roster-user-clicked {:occupant-jid occupant-jid}])]
     (fn [{:keys [occupant-jid nickname]}]
       [:div.roster-user-container {:key occupant-jid :on-click handle-click}
        [:div.roster-icon]
-       [:div.roster-jid nickname]])))
+       [:div.roster-jid nickname]
+       [:div.roster-affiliation {:title (string/capitalize (name affiliation))}
+        (case affiliation
+          :owner crown-emoji)]])))
 
 (defn- roster []
   (let [occupants (rf/subscribe [::rooms.subs/current-room-occupants])]
@@ -159,7 +164,12 @@
              [:div.profile-detail-value (string/capitalize (name affiliation))]])
           [:div.profile-detail
            [:div.profile-detail-title "Role"]
-           [:div.profile-detail-value (string/capitalize (name role))]]]]))))
+           [:div.profile-detail-value (string/capitalize (name role))]]]
+         [:div.profile-actions
+          [:button.profile-action-button
+           "Grant Voice"]
+          [:button.profile-action-button
+           "Make Moderator"]]]))))
 
 (defn app []
   (let [active-chat (rf/subscribe [::chats.subs/active-chat])]

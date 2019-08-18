@@ -82,6 +82,10 @@ body {
   border-radius: 999999px;
 }
 
+.roster-jid {
+  flex-grow: 1;
+}
+
 .profile-container {
   width: 250px;
   background: #fbfbfb;
@@ -171,6 +175,21 @@ body {
 
 .profile-detail-value {
   display: inline-block;
+}
+
+.profile-actions {
+  margin: 1rem;
+}
+
+.profile-action-button {
+  background: #eaeaea;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  padding: .5rem;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: .5rem;
 }
 
 .input-container {
