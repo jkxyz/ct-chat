@@ -6,6 +6,6 @@
               [ring.middleware.defaults :refer [site-defaults wrap-defaults]]))
 
 (def middleware
-  [#(wrap-defaults % site-defaults)
+  [#(wrap-defaults % (assoc site-defaults :session false))
    wrap-exceptions
    wrap-reload])

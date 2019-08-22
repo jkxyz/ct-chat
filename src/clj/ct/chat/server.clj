@@ -1,8 +1,9 @@
 (ns ct.chat.server
-    (:require [ct.chat.handler :refer [app]]
-              [config.core :refer [env]]
-              [ring.adapter.jetty :refer [run-jetty]])
-    (:gen-class))
+  (:gen-class)
+  (:require
+   [ct.chat.handler :refer [app]]
+   [config.core :refer [env]]
+   [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn -main [& args]
   (let [port (or (env :port) 3000)]
