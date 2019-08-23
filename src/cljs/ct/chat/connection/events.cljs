@@ -1,6 +1,7 @@
 (ns ct.chat.connection.events
   (:require
    [re-frame.core :as rf]
+   [ct.xmpp.effects]
    [ct.chat.xmpp.stanzas.framing
     :refer [initial-open-stanza
             open-stanza]]

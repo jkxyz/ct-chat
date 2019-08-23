@@ -26,7 +26,8 @@
                  [proteus "0.1.6"]
 
                  [buddy/buddy-sign "3.1.0"]
-                 [clj-time "0.15.2"]]
+                 [clj-time "0.15.2"]
+                 [cheshire "5.9.0"]]
 
   :plugins [[lein-environ "1.1.0"]
             [lein-cljsbuild "1.1.7"]
@@ -64,7 +65,7 @@
 
             :app
             {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-             :figwheel {:on-jsload "ct.chat.core/mount-root"}
+             :figwheel {:on-jsload "ct.chat/mount-root"}
              :compiler
              {:main "ct.chat.dev"
               :asset-path "/js/out"

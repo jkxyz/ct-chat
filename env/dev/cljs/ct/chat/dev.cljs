@@ -1,10 +1,8 @@
 (ns ^:figwheel-no-load ct.chat.dev
   (:require
-    [ct.chat.core :as core]
-    [devtools.core :as devtools]))
+   [devtools.core :as devtools]
+   [ct.chat]))
 
 (devtools/install!)
 
 (enable-console-print!)
-
-(core/init!)

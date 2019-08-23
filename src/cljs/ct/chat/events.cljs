@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as string]
    [re-frame.core :as rf]
+   [ct.xmpp.effects]
    [ct.chat.xmpp.stanzas.muc :refer [muc-message-stanza]]
    [ct.chat.xmpp.stanzas.message :refer [message-stanza message]]
    [ct.chat.xmpp.stanzas.presence :refer [presence-stanza]]

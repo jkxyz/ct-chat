@@ -12,6 +12,7 @@
    [ring.middleware.reload :refer [wrap-reload]]
    [buddy.sign.jwt :as jwt]
    [clj-time.core :as time]
+   [cheshire.core :as json]
    [ct.chat.middleware :refer [middleware]]))
 
 (def mount-target
@@ -43,10 +44,15 @@
    (head)
    [:body {:class "body-container"}
     mount-target
+    (include-js "/js/app.js")
     [:script {:type "text/javascript"}
-     "window.CT_CHAT_JID = '" jid "';"
-     "window.CT_CHAT_PASSWORD = '" password "';"]
-    (include-js "/js/app.js")]))
+     (let [chat-options {:jid jid
+                         :password password
+                         :roomJid "test-room@chat"
+                         :serverJid "localhost"
+                         :websocketUri "ws://localhost:5443/ws/"}]
+       (format "window.ct.chat.initialize(%s);"
+               (json/generate-string chat-options)))]]))
 
 (defn ejabberd-auth-token [jid]
   (let [claims {:jid jid :exp (time/plus (time/now) (time/days 365))}]
