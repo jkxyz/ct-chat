@@ -17,7 +17,8 @@
 
 (def mount-target
   [:div#app
-   "Loading"])
+   [:div.loader-container
+    [:div.loader "Loading..."]]])
 
 (defn head []
   [:head
