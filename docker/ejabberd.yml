@@ -29,7 +29,7 @@
 hosts:
   - "localhost"
 
-loglevel: 4
+loglevel: 5
 log_rotate_size: 10485760
 log_rotate_date: ""
 log_rotate_count: 1
@@ -66,7 +66,9 @@ sql_database: "ejabberd"
 sql_username: "postgres"
 sql_password: "postgres"
 
-auth_method: sql
+auth_method: jwt
+jwt_key: "/home/ejabberd/jwt_key.json"
+
 default_db: sql
 
 listen:

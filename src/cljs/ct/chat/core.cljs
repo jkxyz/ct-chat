@@ -11,12 +11,9 @@
 (defn mount-root []
   (reagent/render [views/app] (.getElementById js/document "app")))
 
-(defn- query-param [k]
-  (.get (.-searchParams (js/window.URL. js/window.location)) (name k)))
+(defonce ^:private bare-jid js/window.CT_CHAT_JID)
 
-(defonce ^:private bare-jid (or (query-param :jid) "test@localhost"))
-
-(defonce ^:private password (or (query-param :password) "test"))
+(defonce ^:private password js/window.CT_CHAT_PASSWORD)
 
 (def default-room-jid "test-room@chat")
 

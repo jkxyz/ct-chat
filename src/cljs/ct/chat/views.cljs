@@ -46,7 +46,8 @@
        [:div.roster-jid nickname]
        [:div.roster-affiliation {:title (string/capitalize (name affiliation))}
         (case affiliation
-          :owner crown-emoji)]])))
+          :owner crown-emoji
+          "")]])))
 
 (defn- roster []
   (let [occupants (rf/subscribe [::rooms.subs/current-room-occupants])]

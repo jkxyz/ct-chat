@@ -23,7 +23,10 @@
                  [rhizome "0.2.7"]
                  [primitive-math "0.1.5"]
                  [potemkin "0.4.3"]
-                 [proteus "0.1.6"]]
+                 [proteus "0.1.6"]
+
+                 [buddy/buddy-sign "3.1.0"]
+                 [clj-time "0.15.2"]]
 
   :plugins [[lein-environ "1.1.0"]
             [lein-cljsbuild "1.1.7"]

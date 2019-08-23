@@ -1,5 +1,6 @@
 (ns ct.chat.handler
   (:require
+   [clojure.java.io :as io]
    [reitit.ring :as reitit-ring]
    [hiccup.page :refer [include-js include-css html5]]
    [config.core :refer [env]]
@@ -9,6 +10,8 @@
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [prone.middleware :refer [wrap-exceptions]]
    [ring.middleware.reload :refer [wrap-reload]]
+   [buddy.sign.jwt :as jwt]
+   [clj-time.core :as time]
    [ct.chat.middleware :refer [middleware]]))
 
 (def mount-target
@@ -35,18 +38,28 @@
    :headers {"Content-Type" "text/html"}
    :body (cards-page)})
 
-(defn chat-page []
+(defn chat-page [{:keys [jid password]}]
   (html5
    (head)
    [:body {:class "body-container"}
     mount-target
+    [:script {:type "text/javascript"}
+     "window.CT_CHAT_JID = '" jid "';"
+     "window.CT_CHAT_PASSWORD = '" password "';"]
     (include-js "/js/app.js")]))
+
+(defn ejabberd-auth-token [jid]
+  (let [claims {:jid jid :exp (time/plus (time/now) (time/days 365))}]
+    (jwt/sign claims "secret" {:alg :hs256})))
+
+(defn username->jid [username] (str username "@localhost"))
 
 (defn chat-handler [request]
   (if-let [username (get-in request [:session ::username])]
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body (chat-page)}
+    (let [jid (username->jid username)]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (chat-page {:jid jid :password (ejabberd-auth-token jid)})})
     {:status 302
      :headers {"Location" "/login"}}))
 
@@ -75,7 +88,10 @@
      :headers {"Content-Type" "text/html"}
      :body (login-page request)}))
 
-(def users {"test" "test"})
+(def users
+  {"test" "test"
+   "josh" "test"
+   "user" "test"})
 
 (defn authorized-user? [username password]
   (and (users username) (= (users username) password)))

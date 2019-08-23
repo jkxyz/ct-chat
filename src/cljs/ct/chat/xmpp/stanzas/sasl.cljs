@@ -17,9 +17,10 @@
    (string/join "\u0000" [(or authzid nil) authcid passwd])))
 
 (defn sasl-plain-auth-stanza [jid password]
-  (xml/element (xml/qname sasl-ns :auth)
-               {:mechanism "PLAIN"}
-               (js/btoa (sasl-plain-message jid password))))
+  (xml/element
+   (xml/qname sasl-ns :auth)
+   {:mechanism "PLAIN"}
+   (js/btoa (sasl-plain-message jid password))))
 
 (defn sasl-auth-success? [stanza]
   (= (xml/qname sasl-ns :success) (:tag stanza)))

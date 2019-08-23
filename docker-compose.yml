@@ -10,6 +10,7 @@ services:
       - "5443:5443"
     volumes:
       - "./docker/ejabberd.yml:/home/ejabberd/conf/ejabberd.yml"
+      - "./docker/ejabberd_jwt_key.json:/home/ejabberd/jwt_key.json"
 
   postgres:
     build: ./docker/postgres/
