@@ -14,11 +14,11 @@
   (let [ch (chan)]
     (cljs.core.async/tap messages-mult ch)
     (cljs.core.async/go-loop []
-      (js/window.console.debug "<< Received:" (prn-str (cljs.core.async/<! ch)))
+      (js/window.console.debug "<< Received:" (pr-str (cljs.core.async/<! ch)))
       (recur))))
 
 (defn send! [stanza]
-  (when ^boolean js/goog.DEBUG (js/window.console.debug ">> Sending:" (prn-str stanza)))
+  (when ^boolean js/goog.DEBUG (js/window.console.debug ">> Sending:" (pr-str stanza)))
   (.send @connection (xml/emit-str stanza)))
 
 (defn- close-stanza []

@@ -16,9 +16,6 @@
    (js/window.alert (str "Error! " message))
    {}))
 
-;; TODO: Implement reserved nicknames:
-;; https://xmpp.org/extensions/xep-0045.html#reservednick
-
 (rf/reg-event-fx
  ::initialize
  (fn [{:keys [db]} _]

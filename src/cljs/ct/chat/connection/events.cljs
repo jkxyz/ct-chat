@@ -30,10 +30,10 @@
  (fn [{:keys [db]} [_ {:keys [on-ready]}]]
    (let [{:connection/keys [websocket-uri]} db]
      {:db (assoc db :connection/on-ready on-ready)
-      :xmpp/connect {:url (str websocket-uri)
-                     :on-open [::websocket-opened]
-                     :on-error [::connection-error-occured
-                                "Could not connect to the server."]}})))
+      :xmpp/connect
+      {:url websocket-uri
+       :on-open [::websocket-opened]
+       :on-error [::connection-error-occured "Could not connect to the server."]}})))
 
 (rf/reg-event-fx
  ::websocket-opened

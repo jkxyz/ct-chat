@@ -140,7 +140,7 @@
                                   [day8.re-frame/re-frame-10x "0.4.0"]]
 
                    :source-paths ["env/dev/clj"]
-                   :plugins [[lein-figwheel "0.5.18"]
+                   :plugins [[lein-figwheel "0.5.19"]
                              [lein-doo "0.1.10"]
                              #_[cider/cider-nrepl "0.19.0"]
                              [org.clojure/tools.namespace "0.3.0-alpha4"

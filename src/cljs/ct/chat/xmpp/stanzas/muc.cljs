@@ -71,7 +71,8 @@
              :presence presence
              :room-jid room-jid
              :self? (muc-self-presence? presence-stanza)}
-      jid (assoc :bare-jid (first (string/split jid "/"))))))
+      jid (assoc :bare-jid (first (string/split jid "/"))
+                 :username (first (string/split jid "@"))))))
 
 (defn iq-result->room-info [iq-result-stanza]
   (let [[identity] (sequence (comp (tag= (xml/qname disco-info-ns :query))

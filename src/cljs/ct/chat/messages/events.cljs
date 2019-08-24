@@ -18,17 +18,36 @@
 (defn- get-self-occupant-jid [db room-jid]
   (:occupant-jid (first (filter :self? (vals (get-in db [:rooms/occupants room-jid]))))))
 
+(defn- jid-localpart [jid] (first (string/split jid "@")))
+
+(defn- nickname [occupant-jid] (last (string/split occupant-jid "/")))
+
 (rf/reg-event-fx
  ::message-received
  (fn [{:keys [db]} [_ message-stanza]]
    (let [{:chats/keys [active-chat-jid]} db
-         {:keys [chat-jid from] :as message} (message message-stanza)
-         room-jid (first (string/split from "/"))]
+         {:keys [chat-jid from-jid from-occupant-jid] :as message}
+         (message message-stanza)
+         room-jid (first (string/split from-occupant-jid "/"))]
      {:db (cond-> db
             :always
             (update-in [:messages/messages chat-jid]
                        (comp vec (partial take max-messages) conj)
-                       message)
+                       (if from-jid
+                         (assoc message
+                                :from-username (jid-localpart from-jid)
+                                :from-nickname (nickname from-occupant-jid))
+                         (assoc message
+                                :from-username (get-in db
+                                                       [:rooms/occupants
+                                                        room-jid
+                                                        from-occupant-jid
+                                                        :username])
+                                :from-nickname (get-in db
+                                                       [:rooms/occupants
+                                                        room-jid
+                                                        from-occupant-jid
+                                                        :nickname]))))
             (not (get-in db [:chats/chats chat-jid]))
             (assoc-in [:chats/chats chat-jid]
                       {:jid chat-jid

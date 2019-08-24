@@ -88,7 +88,7 @@
       [:button {:type "submit"} "Login"]]]]))
 
 (defn login-handler [request]
-  (if-let [jid (get-in request [:session ::jid])]
+  (if (get-in request [:session ::username])
     {:status 302
      :headers {"Location" "/chat"}}
     {:status 200

@@ -20,8 +20,8 @@
       {:connection/bare-jid jid
        :connection/password password
        :connection/server-bare-jid serverJid
-       :connection/websocket-uri (Uri. websocketUri)
+       :connection/websocket-uri websocketUri
        :rooms/default-room-jid roomJid
        :rooms/default-nickname (jid->nickname jid)
-       :media/signalling-websocket-uri (Uri. "ws://localhost:3500/")}])
+       :media/signalling-websocket-uri "ws://localhost:3500/"}])
     (mount-root)))

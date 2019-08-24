@@ -16,7 +16,7 @@
 (s/def :connection/bare-jid ::bare-jid)
 (s/def :connection/password string?)
 (s/def :connection/server-bare-jid string?)
-(s/def :connection/websocket-uri (s/and uri? #(= "ws" (.getScheme %))))
+(s/def :connection/websocket-uri string?)
 
 (s/def ::db (s/keys :req [:connection/bare-jid
                           :connection/password

@@ -40,10 +40,10 @@
 (defn- roster-user [{:keys [occupant-jid affiliation]}]
   (let [handle-click
         #(rf/dispatch [::events/roster-user-clicked {:occupant-jid occupant-jid}])]
-    (fn [{:keys [occupant-jid nickname]}]
+    (fn [{:keys [occupant-jid username nickname]}]
       [:div.roster-user-container {:key occupant-jid :on-click handle-click}
        [:div.roster-icon]
-       [:div.roster-jid nickname]
+       [:div.roster-jid (or username nickname)]
        [:div.roster-affiliation {:title (string/capitalize (name affiliation))}
         (case affiliation
           :owner crown-emoji
@@ -82,8 +82,6 @@
    [broadcast]
    [roster]])
 
-(defn nickname [occupant-jid] (last (clojure.string/split occupant-jid "/")))
-
 (defn- autoscrolling-messages []
   (let [!container (atom nil)
         scroll (fn [] (.scrollTo @!container 0 (.-scrollHeight @!container)))
@@ -96,11 +94,13 @@
       (fn []
         [:div.messages-container {:ref (partial reset! !container)}
          [:div.messages-scroll-container
-          (for [{:keys [from body id type chat-jid]} @messages]
+          (for [{:keys [id from-username from-nickname body]} @messages]
             [:div.message-container {:key id}
              [:span.message-from
-              (nickname from)] ": "
+              (or from-username from-nickname)] ": "
              [:span.message-body body]])]])})))
+
+(defn nickname [occupant-jid] (last (clojure.string/split occupant-jid "/")))
 
 (defn chat-tab [{:keys [jid]}]
   (let [handle-click #(rf/dispatch [::events/chat-tab-clicked {:jid jid}])
@@ -110,6 +110,7 @@
        {:class [(when active? "active")]
         :on-click handle-click}
        (condp = type
+         ;; TODO: Put room title in db
          :chat (nickname jid)
          :groupchat (:name @room))
        (when (< 0 unread-messages-count)
@@ -175,12 +176,14 @@
 (defn app []
   (let [active-chat (rf/subscribe [::chats.subs/active-chat])]
     (fn []
-      [:div.chat-container
-       [webcams]
-       [chat-tabs]
-       [:div.messages-and-roster-container
-        [autoscrolling-messages]
-        [profile-panel]
-        (when (= :groupchat (:type @active-chat))
-          [sidebar])]
-       [input]])))
+      (if-not @active-chat
+        [:div.loader-container [:div.loader "Loading..."]]
+        [:div.chat-container
+         [webcams]
+         [chat-tabs]
+         [:div.messages-and-roster-container
+          [autoscrolling-messages]
+          [profile-panel]
+          (when (= :groupchat (:type @active-chat))
+            [sidebar])]
+         [input]]))))

@@ -24,9 +24,9 @@
 (comment
   (let [{:keys [from-jid]} (get-in db [:chats/chats (:chats/active-chat-jid db)])]
     {:db (-> db
-             (assoc-in [:chats/chats occupant-jid] {:jid occupant-jid
-                                                    :type :chat
-                                                    :from-jid from-jid})
+             (assoc-in
+              [:chats/chats occupant-jid]
+              {:jid occupant-jid :type :chat :from-jid from-jid})
              (assoc :chats/active-chat-jid occupant-jid))}))
 
 (rf/reg-event-fx
