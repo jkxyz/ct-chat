@@ -40,11 +40,11 @@
 
 (s/def :rooms/occupants (s/map-of ::jids/bare-jid ::occupants))
 
-(s/def ::jid ::jids/bare-jid)
+(s/def :room/jid ::jids/bare-jid)
 
-(s/def ::name string?)
+(s/def :room/name string?)
 
-(s/def ::room (s/keys :req-un [::jid ::name]))
+(s/def ::room (s/keys :req [:room/jid :room/name]))
 
 (s/def :rooms/rooms (s/map-of ::jids/bare-jid ::room))
 

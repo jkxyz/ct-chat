@@ -16,4 +16,4 @@
  :<- [::chats]
  :<- [::active-chat-jid]
  (fn [[chats active-chat-jid] _]
-   (first (filter #(= active-chat-jid (:jid %)) chats))))
+   (first (filter #(= active-chat-jid (:chat/jid %)) chats))))

@@ -3,16 +3,19 @@
    [cljs.spec.alpha :as s]
    [ct.chat.jids :as jids]))
 
-(s/def ::jid ::jids/bare-jid)
+(s/def :chat/jid ::jids/bare-jid)
 
-(s/def ::type #{:groupchat})
+(s/def :chat/type #{:chat :groupchat})
 
-(s/def ::from-jid ::jids/full-jid)
+(s/def :chat/from-jid ::jids/full-jid)
+
+(s/def :chat/unread-messages-count integer?)
 
 (s/def ::chat
-  (s/keys :req-un [::jid
-                   ::type
-                   ::from-jid]))
+  (s/keys :req [:chat/jid
+                :chat/type
+                :chat/from-jid]
+          :opt [:chat/unread-messages-count]))
 
 (s/def :chats/chats (s/map-of ::jids/bare-jid ::chat))
 

@@ -53,7 +53,7 @@
   (let [occupants (rf/subscribe [::rooms.subs/current-room-occupants])]
     (fn []
       [:div.roster-container
-       (for [{:keys [occupant-jid] :as occupant} @occupants]
+       (for [{:occupant/keys [occupant-jid] :as occupant} @occupants]
          ^{:key occupant-jid} [roster-user occupant])])))
 
 (defn- broadcast-button [_]
@@ -102,19 +102,21 @@
 
 (defn nickname [occupant-jid] (last (clojure.string/split occupant-jid "/")))
 
-(defn chat-tab [{:keys [jid]}]
-  (let [handle-click #(rf/dispatch [::events/chat-tab-clicked {:jid jid}])
+(defn chat-tab [{:keys [chat]}]
+  (let [{:chat/keys [jid]} chat
+        handle-click #(rf/dispatch [::events/chat-tab-clicked {:jid jid}])
         room (rf/subscribe [::rooms.subs/room jid])]
-    (fn [{:keys [active? jid type unread-messages-count]}]
-      [:a.chat-tab
-       {:class [(when active? "active")]
-        :on-click handle-click}
-       (condp = type
-         ;; TODO: Put room title in db
-         :chat (nickname jid)
-         :groupchat (:room/name @room))
-       (when (< 0 unread-messages-count)
-         [:span " (" unread-messages-count ")"])])))
+    (fn [{:keys [chat active?]}]
+      (let [{:chat/keys [jid type unread-messages-count]} chat]
+        [:a.chat-tab
+         {:class [(when active? "active")]
+          :on-click handle-click}
+         (condp = type
+           ;; TODO: Put room title in db
+           :chat (nickname jid)
+           :groupchat (:room/name @room))
+         (when (< 0 unread-messages-count)
+           [:span " (" unread-messages-count ")"])]))))
 
 (defn chat-tabs []
   (let [chats (rf/subscribe [::chats.subs/chats])
@@ -122,8 +124,8 @@
     (fn []
       [:div.chat-tabs-container
        (doall
-        (for [{:keys [jid] :as chat} @chats]
-          ^{:key jid} [chat-tab (merge chat {:active? (= @active-chat-jid jid)})]))])))
+        (for [{:chat/keys [jid] :as chat} @chats]
+          ^{:key jid} [chat-tab {:chat chat :active? (= @active-chat-jid jid)}]))])))
 
 (defn webcam [{:keys [consumer-id]}]
   (let [!video (atom nil)]
@@ -201,6 +203,6 @@
          [:div.messages-and-roster-container
           [autoscrolling-messages]
           [profile-panel]
-          (when (= :groupchat (:type @active-chat))
+          (when (= :groupchat (:chat/type @active-chat))
             [sidebar])]
          [input]]))))

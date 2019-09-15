@@ -65,6 +65,6 @@
  (fn [{:keys [db]} [_ presence-stanza]]
    (let [occupant-jid (get-in presence-stanza [:attrs :from])
          room-jid (first (string/split occupant-jid "/"))]
-     {:db (assoc-in db [:chats/chats room-jid] {:jid room-jid
-                                                :type :groupchat
-                                                :from-jid occupant-jid})})))
+     {:db (assoc-in db [:chats/chats room-jid] #:chat {:jid room-jid
+                                                       :type :groupchat
+                                                       :from-jid occupant-jid})})))

@@ -54,4 +54,4 @@
                        :type (if (muc-message? message-stanza) :groupchat :chat)
                        :from-jid (get-self-occupant-jid db room-jid)})
             (not= active-chat-jid chat-jid)
-            (update-in [:chats/chats chat-jid :unread-messages-count] inc))})))
+            (update-in [:chats/chats chat-jid :chat/unread-messages-count] inc))})))
