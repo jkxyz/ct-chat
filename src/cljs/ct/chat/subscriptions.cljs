@@ -1,6 +1,7 @@
 (ns ct.chat.subscriptions
   (:require
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [ct.chat.chats.subscriptions :as chats.subs]))
 
 (rf/reg-sub
  ::profile-panel
@@ -12,3 +13,8 @@
        {:nickname nickname
         :affiliation affiliation
         :role role}))))
+
+(rf/reg-sub
+ ::available-profile-actions
+ :<- [::chats.subs/active-chat-jid]
+ (fn []))

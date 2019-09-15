@@ -147,6 +147,22 @@
        (for [consumer-id @consumer-ids]
          ^{:key consumer-id} [webcam {:consumer-id consumer-id}])])))
 
+(defn profile-actions [{:keys [actions on-action]}]
+  (let [handle-input
+        (fn [event]
+          (on-action (keyword (.-target.value event)))
+          (set! (.-target.value event) ""))]
+    (fn []
+      [:select.profile-actions
+       {:default-value ""
+        :on-input handle-input}
+       [:option {:disabled true :value ""}
+        "Choose an action..."]
+       (for [[type title] actions]
+         ^{:key type}
+         [:option {:value (name type)}
+          title])])))
+
 (defn profile-panel []
   (let [profile-panel (rf/subscribe [::subs/profile-panel])
         handle-close-button-click
@@ -159,6 +175,8 @@
           [:div.profile-image]]
          [:a.profile-link-button
           "View Profile"]
+         [:a.profile-link-button
+          "Send Message"]
          [:div.profile-details
           (when-not (= :none affiliation)
             [:div.profile-detail
@@ -167,11 +185,10 @@
           [:div.profile-detail
            [:div.profile-detail-title "Role"]
            [:div.profile-detail-value (string/capitalize (name role))]]]
-         [:div.profile-actions
-          [:button.profile-action-button
-           "Grant Voice"]
-          [:button.profile-action-button
-           "Make Moderator"]]]))))
+         [:div.profile-actions-container
+          [profile-actions
+           {:on-action #(rf/dispatch [::events/profile-action-selected %])
+            :actions [[:ban "Ban this user"]]}]]]))))
 
 (defn app []
   (let [active-chat (rf/subscribe [::chats.subs/active-chat])]

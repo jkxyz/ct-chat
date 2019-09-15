@@ -90,3 +90,8 @@
        (presence-stanza
         {:from full-jid
          :to (get-in chats [active-chat-jid :from-jid])})}})))
+
+(rf/reg-event-fx
+ ::profile-action-selected
+ (fn [_ [_ action-type]]
+   {}))

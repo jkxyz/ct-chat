@@ -1,26 +1,14 @@
 (ns ct.chat.db
   (:require
-   [clojure.string :as string]
-   [cljs.spec.alpha :as s]))
+   [cljs.spec.alpha :as s]
+   [ct.chat.chats.db :as chats.db]
+   [ct.chat.connection.db :as connection.db]
+   [ct.chat.rooms.db :as rooms.db]
+   [ct.chat.media.db :as media.db]))
 
-(s/def ::bare-jid (s/and string? #(= 2 (count (string/split % "@")))))
+(s/def ::db (s/merge ::chats.db/chats-keys
+                     ::connection.db/connection-keys
+                     ::rooms.db/rooms-keys
+                     ::media.db/media-keys))
 
-(s/def ::room-jid ::bare-jid)
-
-(s/def ::occupant-jid (s/and string?
-                             (fn [s]
-                               (let [[room-jid nick] (string/split s "/")]
-                                 (and (string? nick)
-                                      (= 2 (count (string/split room-jid "@"))))))))
-
-(s/def :connection/bare-jid ::bare-jid)
-(s/def :connection/password string?)
-(s/def :connection/server-bare-jid string?)
-(s/def :connection/websocket-uri string?)
-
-(s/def ::db (s/keys :req [:connection/bare-jid
-                          :connection/password
-                          :connection/server-bare-jid
-                          :connection/websocket-uri]))
-
-(defn initial-db [config] {:post [(s/valid? ::db %)]} config)
+(defn initial-db [config] config)
