@@ -37,10 +37,10 @@
 
 (def crown-emoji "👑")
 
-(defn- roster-user [{:keys [occupant-jid affiliation]}]
+(defn- roster-user [{:occupant/keys [occupant-jid affiliation]}]
   (let [handle-click
         #(rf/dispatch [::events/roster-user-clicked {:occupant-jid occupant-jid}])]
-    (fn [{:keys [occupant-jid username nickname]}]
+    (fn [{:occupant/keys [occupant-jid username nickname]}]
       [:div.roster-user-container {:key occupant-jid :on-click handle-click}
        [:div.roster-icon]
        [:div.roster-jid (or username nickname)]

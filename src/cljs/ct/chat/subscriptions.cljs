@@ -8,7 +8,7 @@
  (fn [{:profile-panel/keys [open? chat-jid occupant-jid]
        :rooms/keys [occupants]}]
    (when open?
-     (let [{:keys [nickname affiliation role]}
+     (let [{:occupant/keys [nickname affiliation role]}
            (get-in occupants [chat-jid occupant-jid])]
        {:nickname nickname
         :affiliation affiliation

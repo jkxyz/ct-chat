@@ -6,6 +6,7 @@
   (:require
    [clojure.string :as string]
    [clojure.data.xml :as xml]
+   [ct.chat.jids :refer [jidparts bare-jid]]
    [ct.chat.xmpp.xml :refer [tag= attr= children]]
    [ct.chat.xmpp.namespaces
     :refer [default-ns
@@ -57,22 +58,23 @@
 
 (defn muc-presence->occupant [presence-stanza]
   (let [occupant-jid (get-in presence-stanza [:attrs :from])
-        [room-jid nickname] (string/split occupant-jid "/")
+        {nickname :resource} (jidparts occupant-jid)
+        room-jid (bare-jid occupant-jid)
         presence (or (keyword (get-in presence-stanza [:attrs :type]))
                      :available)
         {:keys [jid role affiliation]}
         (:attrs (first (sequence (comp (tag= (xml/qname muc-user-ns :x))
                                        (tag= (xml/qname muc-user-ns :item)))
                                  [presence-stanza])))]
-    (cond-> {:role (keyword role)
-             :affiliation (keyword affiliation)
-             :occupant-jid occupant-jid
-             :nickname nickname
-             :presence presence
-             :room-jid room-jid
-             :self? (muc-self-presence? presence-stanza)}
-      jid (assoc :bare-jid (first (string/split jid "/"))
-                 :username (first (string/split jid "@"))))))
+    (cond-> #:occupant {:role (keyword role)
+                        :affiliation (keyword affiliation)
+                        :occupant-jid occupant-jid
+                        :nickname nickname
+                        :presence presence
+                        :room-jid room-jid
+                        :self? (muc-self-presence? presence-stanza)}
+            jid (assoc :occupant/bare-jid (bare-jid jid)
+                       :occupant/username (:local (jidparts jid))))))
 
 (defn iq-result->room-info [iq-result-stanza]
   (let [[identity] (sequence (comp (tag= (xml/qname disco-info-ns :query))

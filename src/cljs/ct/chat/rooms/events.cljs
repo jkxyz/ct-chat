@@ -29,7 +29,7 @@
 (rf/reg-event-fx
  ::room-presence-received
  (fn [{:keys [db]} [_ presence-stanza]]
-   (let [{:keys [room-jid occupant-jid] :as occupant}
+   (let [{:occupant/keys [room-jid occupant-jid] :as occupant}
          (muc-presence->occupant presence-stanza)]
      {:db (assoc-in db [:rooms/occupants room-jid occupant-jid] occupant)})))
 

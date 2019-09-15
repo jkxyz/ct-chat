@@ -3,38 +3,38 @@
    [cljs.spec.alpha :as s]
    [ct.chat.jids :as jids]))
 
-(s/def :rooms/default-nickname string?)
+(s/def :rooms/default-nickname ::jids/resource)
 
 (s/def :rooms/default-room-jid ::jids/bare-jid)
 
-(s/def ::role #{:participant})
+(s/def :occupant/role #{:participant})
 
-(s/def ::presence #{:available})
+(s/def :occupant/presence #{:available})
 
-(s/def ::affiliation #{:none})
+(s/def :occupant/affiliation #{:none})
 
-(s/def ::nickname string?)
+(s/def :occupant/nickname ::jids/resource)
 
-(s/def ::username string?)
+(s/def :occupant/username ::jids/local)
 
-(s/def ::self? boolean?)
+(s/def :occupant/self? boolean?)
 
-(s/def ::occupant-jid ::jids/full-jid)
+(s/def :occupant/occupant-jid ::jids/full-jid)
 
-(s/def ::bare-jid ::jids/bare-jid)
+(s/def :occupant/bare-jid ::jids/bare-jid)
 
-(s/def ::room-jid ::jids/bare-jid)
+(s/def :occupant/room-jid ::jids/bare-jid)
 
 (s/def ::occupant
-  (s/keys :req-un [::role
-                   ::presence
-                   ::affiliation
-                   ::nickname
-                   ::username
-                   ::self?
-                   ::occupant-jid
-                   ::bare-jid
-                   ::room-jid]))
+  (s/keys :req [:occupant/role
+                :occupant/presence
+                :occupant/affiliation
+                :occupant/nickname
+                :occupant/username
+                :occupant/self?
+                :occupant/occupant-jid
+                :occupant/bare-jid
+                :occupant/room-jid]))
 
 (s/def ::occupants (s/map-of ::jids/full-jid ::occupant))
 

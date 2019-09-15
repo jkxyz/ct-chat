@@ -33,3 +33,7 @@
 (s/def ::bare-jid (s/and ::jid (complement :resource)))
 
 (s/def ::full-jid (s/and ::jid :domain :local :resource))
+
+(defn bare-jid [jid]
+  (let [{:keys [local domain]} (jidparts jid)]
+    (str local "@" domain)))
