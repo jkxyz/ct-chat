@@ -80,5 +80,5 @@
   (let [[identity] (sequence (comp (tag= (xml/qname disco-info-ns :query))
                                    (tag= (xml/qname disco-info-ns :identity)))
                              [iq-result-stanza])]
-    {:jid (get-in iq-result-stanza [:attrs :from])
-     :name (get-in identity [:attrs :name])}))
+    {:room/jid (get-in iq-result-stanza [:attrs :from])
+     :room/name (get-in identity [:attrs :name])}))

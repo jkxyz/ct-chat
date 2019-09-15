@@ -112,7 +112,7 @@
        (condp = type
          ;; TODO: Put room title in db
          :chat (nickname jid)
-         :groupchat (:name @room))
+         :groupchat (:room/name @room))
        (when (< 0 unread-messages-count)
          [:span " (" unread-messages-count ")"])])))
 

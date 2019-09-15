@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as string]
    [re-frame.core :as rf]
+   [ct.chat.jids :refer [bare-jid]]
    [ct.chat.xmpp.stanzas.disco :refer [disco-info-query-content]]
    [ct.chat.xmpp.stanzas.muc
     :refer [muc-room-presence-stanza
@@ -57,7 +58,7 @@
        :on-message [::room-self-presence-received]
        :on-timeout [::rooms-error-occurred "Could not join default room."]
        :xform (filter muc-self-presence?)}
-      :db (assoc-in db [:rooms/rooms (:jid room-info)] room-info)})))
+      :db (assoc-in db [:rooms/rooms (:room/jid room-info)] room-info)})))
 
 (rf/reg-event-fx
  ::room-self-presence-received
