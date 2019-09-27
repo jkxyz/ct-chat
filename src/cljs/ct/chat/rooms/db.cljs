@@ -19,6 +19,8 @@
 
 (s/def :occupant/self? boolean?)
 
+(s/def :occupant/kicked? boolean?)
+
 (s/def :occupant/occupant-jid ::jids/full-jid)
 
 (s/def :occupant/bare-jid ::jids/bare-jid)
@@ -34,7 +36,8 @@
                 :occupant/self?
                 :occupant/occupant-jid
                 :occupant/bare-jid
-                :occupant/room-jid]))
+                :occupant/room-jid]
+          :opt [:occupant/kicked?]))
 
 (s/def ::occupants (s/map-of ::jids/full-jid ::occupant))
 

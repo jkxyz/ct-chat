@@ -10,7 +10,8 @@
    [ct.chat.connection.events :as connection.events]
    [ct.chat.rooms.events :as rooms.events]
    [ct.chat.messages.events :as messages.events]
-   [ct.chat.media.events :as media.events]))
+   [ct.chat.media.events :as media.events]
+   [ct.chat.profile-panel.events :as profile-panel.events]))
 
 (rf/reg-event-fx
  ::initialize
@@ -19,7 +20,8 @@
     :dispatch-n
     [[::connection.events/initialize {:on-ready [::rooms.events/initialize]}]
      [::messages.events/initialize]
-     [::media.events/initialize]]}))
+     [::media.events/initialize]
+     [::profile-panel.events/initialize]]}))
 
 (comment
   (let [{:keys [from-jid]} (get-in db [:chats/chats (:chats/active-chat-jid db)])]

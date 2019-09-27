@@ -3,6 +3,7 @@
    [clojure.string :as string]
    [re-frame.core :as rf]
    [reagent.core :as reagent]
+   [ct.chat.xmpp.jids :refer [jidparts bare-jid]]
    [ct.chat.media.device :refer [consumers]]
    [ct.chat.events :as events]
    [ct.chat.messages.events :as messages.events]
@@ -51,7 +52,7 @@
           "")]])))
 
 (defn- roster []
-  (let [occupants (rf/subscribe [::rooms.subs/current-room-occupants-sorted])]
+  (let [occupants (rf/subscribe [::rooms.subs/current-room-available-occupants-sorted])]
     (fn []
       [:div.roster-container
        (for [{:occupant/keys [occupant-jid] :as occupant} @occupants]
@@ -83,6 +84,32 @@
    [broadcast]
    [roster]])
 
+(defn- occupant-name [{:occupant/keys [username nickname]}] (or username nickname))
+
+(defn- status-message-body
+  [{:message/keys [actor-occupant-jid occupant-jid]}]
+  (let [actor-occupant (rf/subscribe [::rooms.subs/occupant
+                                      (bare-jid actor-occupant-jid)
+                                      actor-occupant-jid])
+        occupant (rf/subscribe [::rooms.subs/occupant
+                                (bare-jid occupant-jid)
+                                occupant-jid])]
+    (fn [{:message/keys [action]}]
+      (let [actor-name (occupant-name @actor-occupant)
+            name (occupant-name @occupant)]
+        [:span.message-status-body
+         (case action
+           :kicked (str name " was kicked by " actor-name))]))))
+
+(defn- message-container
+  [{:message/keys [type from-username from-nickname body] :as message}]
+  [:div.message-container
+   (when (= :message type)
+     [:<> [:span.message-from (or from-username from-nickname)] ": "])
+   (case type
+     :message [:span.message-body body]
+     :status [status-message-body message])])
+
 (defn- autoscrolling-messages []
   (let [!container (atom nil)
         scroll (fn [] (.scrollTo @!container 0 (.-scrollHeight @!container)))
@@ -95,11 +122,8 @@
       (fn []
         [:div.messages-container {:ref (partial reset! !container)}
          [:div.messages-scroll-container
-          (for [{:message/keys [id from-username from-nickname body]} @messages]
-            [:div.message-container {:key id}
-             [:span.message-from
-              (or from-username from-nickname)] ": "
-             [:span.message-body body]])]])})))
+          (for [{:message/keys [id] :as message} @messages]
+            ^{:key id} [message-container message])]])})))
 
 (defn nickname [occupant-jid] (last (clojure.string/split occupant-jid "/")))
 
@@ -112,12 +136,11 @@
         [:a.chat-tab
          {:class [(when active? "active")]
           :on-click handle-click}
-         (condp = type
-           ;; TODO: Put room title in db
-           :chat (nickname jid)
+         (case type
+           ;; TODO: Use username for private message title when available
+           :chat (:resource (jidparts jid))
            :groupchat (:room/name @room))
-         (when (< 0 unread-messages-count)
-           [:span " (" unread-messages-count ")"])]))))
+         (when (< 0 unread-messages-count) [:span " (" unread-messages-count ")"])]))))
 
 (defn chat-tabs []
   (let [chats (rf/subscribe [::chats.subs/chats])

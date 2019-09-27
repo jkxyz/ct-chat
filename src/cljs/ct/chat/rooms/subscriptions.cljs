@@ -15,13 +15,19 @@
  (fn [[occupants active-chat-jid] _]
    (vals (get occupants active-chat-jid))))
 
+(rf/reg-sub
+ ::current-room-available-occupants
+ :<- [::current-room-occupants]
+ (fn [occupants]
+   (filter #(= :available (:occupant/presence %)) occupants)))
+
 (def ^:private role-rankings {:moderator 1 :participant 2 :visitor 3})
 
 (def ^:private affiliation-rankings {:owner 1 :admin 2 :member 3 :none 4})
 
 (rf/reg-sub
- ::current-room-occupants-sorted
- :<= [::current-room-occupants]
+ ::current-room-available-occupants-sorted
+ :<= [::current-room-available-occupants]
  (fn [occupants]
    (->> occupants
         (sort-by (some-fn :occupant/username :occupant/nickname))
@@ -38,3 +44,9 @@
  :<- [::all-rooms]
  (fn [all-rooms [_ room-jid]]
    (get all-rooms room-jid)))
+
+(rf/reg-sub
+ ::occupant
+ :<- [::all-occupants]
+ (fn [occupants [_ room-jid occupant-jid]]
+   (get-in occupants [room-jid occupant-jid])))

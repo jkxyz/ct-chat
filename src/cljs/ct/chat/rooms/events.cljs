@@ -7,6 +7,8 @@
    [ct.chat.xmpp.stanzas.muc
     :refer [muc-room-presence-stanza
             muc-self-presence?
+            muc-kicked-presence?
+            muc-kicked-presence
             muc-presence?
             muc-presence->occupant
             iq-result->room-info]]))
@@ -27,12 +29,30 @@
      :xform (filter muc-presence?)
      :on-message [::room-presence-received]}}))
 
+(defn- kicked-message [presence-stanza occupant]
+  (let [{:occupant/keys [username nickname room-jid]} occupant
+        {:keys [actor-nickname]} (muc-kicked-presence presence-stanza)]
+    {:message/type :status
+     :message/id (str (random-uuid))
+     :message/action :kicked
+     :message/actor-occupant-jid (str room-jid "/" actor-nickname)
+     :message/occupant-jid (:occupant/occupant-jid occupant)}))
+
+(defn- append-kicked-message [app-db presence-stanza occupant]
+  (let [{:occupant/keys [kicked? room-jid]} occupant]
+    (cond-> app-db
+      kicked? (update-in [:messages/messages room-jid]
+                         conj
+                         (kicked-message presence-stanza occupant)))))
+
 (rf/reg-event-fx
  ::room-presence-received
  (fn [{:keys [db]} [_ presence-stanza]]
    (let [{:occupant/keys [room-jid occupant-jid] :as occupant}
          (muc-presence->occupant presence-stanza)]
-     {:db (assoc-in db [:rooms/occupants room-jid occupant-jid] occupant)})))
+     {:db (-> db
+              (assoc-in [:rooms/occupants room-jid occupant-jid] occupant)
+              (append-kicked-message presence-stanza occupant))})))
 
 (rf/reg-event-fx
  ::presence-listeners-ready

@@ -25,16 +25,17 @@
 (defn message-addresses [message-stanza]
   (let [addresses (sequence (tag= (xml/qname address-ns :addresses)) [message-stanza])]
     (if-let [content (:content (first addresses))]
-     (into {} (map (juxt (comp keyword :type :attrs) (comp :jid :attrs)) content))
-     nil)))
+      (into {} (map (juxt (comp keyword :type :attrs) (comp :jid :attrs)) content))
+      nil)))
 
 (defn message [message-stanza]
   (let [from (get-in message-stanza [:attrs :from])
         type (or (keyword (get-in message-stanza [:attrs :type])) :chat)
         chat-jid (if (= :groupchat type) (first (string/split from "/")) from)
         addresses (message-addresses message-stanza)]
-    (cond-> {:message/id (get-in message-stanza [:attrs :id])
-             :message/type type
+    (cond-> {:message/type :message
+             :message/id (get-in message-stanza [:attrs :id])
+             :message/message-type type
              :message/from-occupant-jid from
              :message/chat-jid chat-jid
              :message/body (message-body message-stanza)}
