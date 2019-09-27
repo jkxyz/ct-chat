@@ -51,7 +51,7 @@
           "")]])))
 
 (defn- roster []
-  (let [occupants (rf/subscribe [::rooms.subs/current-room-occupants])]
+  (let [occupants (rf/subscribe [::rooms.subs/current-room-occupants-sorted])]
     (fn []
       [:div.roster-container
        (for [{:occupant/keys [occupant-jid] :as occupant} @occupants]
