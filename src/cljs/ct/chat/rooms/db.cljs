@@ -1,7 +1,7 @@
 (ns ct.chat.rooms.db
   (:require
    [cljs.spec.alpha :as s]
-   [ct.chat.jids :as jids]))
+   [ct.chat.xmpp.jids :as jids]))
 
 (s/def :rooms/default-nickname ::jids/resource)
 

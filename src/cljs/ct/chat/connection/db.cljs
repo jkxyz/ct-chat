@@ -1,7 +1,7 @@
 (ns ct.chat.connection.db
   (:require
    [cljs.spec.alpha :as s]
-   [ct.chat.jids :as jids]))
+   [ct.chat.xmpp.jids :as jids]))
 
 (s/def ::re-frame-event (s/cat :event keyword? :args (s/* any?)))
 

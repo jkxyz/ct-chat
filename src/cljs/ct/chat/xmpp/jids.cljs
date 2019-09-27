@@ -1,4 +1,4 @@
-(ns ct.chat.jids
+(ns ct.chat.xmpp.jids
   "The specification for the JID format is defined in RFC 6122:
   https://tools.ietf.org/html/rfc6122"
   (:require

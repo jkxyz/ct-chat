@@ -2,7 +2,7 @@
   (:require
    [clojure.string :as string]
    [re-frame.core :as rf]
-   [ct.chat.jids :refer [bare-jid]]
+   [ct.chat.xmpp.jids :refer [bare-jid]]
    [ct.chat.xmpp.stanzas.disco :refer [disco-info-query-content]]
    [ct.chat.xmpp.stanzas.muc
     :refer [muc-room-presence-stanza

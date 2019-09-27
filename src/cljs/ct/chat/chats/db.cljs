@@ -1,7 +1,7 @@
 (ns ct.chat.chats.db
   (:require
    [cljs.spec.alpha :as s]
-   [ct.chat.jids :as jids]))
+   [ct.chat.xmpp.jids :as jids]))
 
 (s/def :chat/jid ::jids/bare-jid)
 

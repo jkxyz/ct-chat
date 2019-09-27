@@ -6,7 +6,7 @@
   (:require
    [clojure.string :as string]
    [clojure.data.xml :as xml]
-   [ct.chat.jids :refer [jidparts bare-jid]]
+   [ct.chat.xmpp.jids :refer [jidparts bare-jid]]
    [ct.chat.xmpp.xml :refer [tag= attr= children]]
    [ct.chat.xmpp.namespaces
     :refer [default-ns

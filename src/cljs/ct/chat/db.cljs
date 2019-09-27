@@ -4,11 +4,13 @@
    [ct.chat.chats.db :as chats.db]
    [ct.chat.connection.db :as connection.db]
    [ct.chat.rooms.db :as rooms.db]
-   [ct.chat.media.db :as media.db]))
+   [ct.chat.media.db :as media.db]
+   [ct.chat.messages.db :as messages.db]))
 
 (s/def ::db (s/merge ::chats.db/chats-keys
                      ::connection.db/connection-keys
                      ::rooms.db/rooms-keys
-                     ::media.db/media-keys))
+                     ::media.db/media-keys
+                     ::messages.db/messages-keys))
 
 (defn initial-db [config] config)

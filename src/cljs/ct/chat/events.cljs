@@ -43,11 +43,6 @@
                  :profile-panel/occupant-jid occupant-jid)})))
 
 (rf/reg-event-fx
- ::profile-panel-close-button-clicked
- (fn [{:keys [db]} _]
-   {:db (assoc db :profile-panel/open? false)}))
-
-(rf/reg-event-fx
  ::chat-tab-clicked
  (fn [{:keys [db]} [_ {:keys [jid]}]]
    {:db (-> db
@@ -62,7 +57,7 @@
          message-attrs {:from full-jid
                         :to active-chat-jid
                         :body message-text}
-         stanza (condp = (:type active-chat)
+         stanza (condp = (:chat/type active-chat)
                   :chat (message-stanza message-attrs)
                   :groupchat (muc-message-stanza message-attrs))]
      (cond-> {:xmpp/send {:stanza stanza}}

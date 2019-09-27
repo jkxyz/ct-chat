@@ -33,9 +33,9 @@
         type (or (keyword (get-in message-stanza [:attrs :type])) :chat)
         chat-jid (if (= :groupchat type) (first (string/split from "/")) from)
         addresses (message-addresses message-stanza)]
-    (cond-> {:id (get-in message-stanza [:attrs :id])
-             :type type
-             :from-occupant-jid from
-             :chat-jid chat-jid
-             :body (message-body message-stanza)}
-      addresses (assoc :from-jid (:ofrom addresses)))))
+    (cond-> {:message/id (get-in message-stanza [:attrs :id])
+             :message/type type
+             :message/from-occupant-jid from
+             :message/chat-jid chat-jid
+             :message/body (message-body message-stanza)}
+      addresses (assoc :message/from-jid (:ofrom addresses)))))
