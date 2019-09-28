@@ -1,4 +1,6 @@
-(ns ct.chat.xmpp.xml)
+(ns ct.chat.xmpp.xml
+  (:require
+   [clojure.data.xml :as xml]))
 
 (def children (mapcat :content))
 
@@ -13,3 +15,8 @@
 (defn attr= [a v] (attrp a (partial = v)))
 
 (defn path [stanza xforms] (sequence (apply comp xforms) [stanza]))
+
+(defn xml [[tag ?attrs & content]]
+  (let [content (remove nil? (if (map? ?attrs) content (concat [?attrs] content)))
+        attrs (if (map? ?attrs) ?attrs {})]
+    (xml/element* tag attrs (map #(if (vector? %) (xml %) %) content))))

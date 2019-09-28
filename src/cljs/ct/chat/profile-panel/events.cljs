@@ -3,6 +3,7 @@
    [re-frame.core :as rf]
    [ct.chat.xmpp.stanzas.muc
     :refer [set-muc-role-iq-content
+            set-muc-affiliation-iq-content
             muc-unavailable-presence?]]))
 
 (rf/reg-event-fx
@@ -32,10 +33,14 @@
    (let [{:profile-panel/keys [chat-jid occupant-jid]} db
          target-occupant (get-in (:rooms/occupants db) [chat-jid occupant-jid])]
      {:dispatch
-      (case type
-        :kick [::kick-occupant-selected {:target-occupant target-occupant}]
-        :revoke-voice [::revoke-voice-selected {:target-occupant target-occupant}]
-        :grant-voice [::grant-voice-selected {:target-occupant target-occupant}])})))
+      [(case type
+         :kick ::kick-occupant-selected
+         :revoke-voice ::revoke-voice-selected
+         :grant-voice ::grant-voice-selected
+         :grant-moderator-status ::grant-moderator-status-selected
+         :revoke-moderator-status ::revoke-moderator-status-selected
+         :ban ::ban-selected)
+       {:target-occupant target-occupant}]})))
 
 (rf/reg-event-fx
  ::kick-selected
@@ -85,5 +90,56 @@
 
 (rf/reg-event-fx
  ::grant-voice-result-received
+ (fn [_ _]
+   {}))
+
+(rf/reg-event-fx
+ ::grant-moderator-status-selected
+ (fn [{:keys [db]} [_ {:keys [target-occupant]}]]
+   {:xmpp/query
+    {:type :set
+     :content (set-muc-role-iq-content
+               {:nick (:occupant/nickname target-occupant)
+                :role :moderator})
+     :from (:connection/full-jid db)
+     :to (:occupant/room-jid target-occupant)
+     :on-result [::grant-moderator-status-result-received]}}))
+
+(rf/reg-event-fx
+ ::grant-moderator-status-result-received
+ (fn [_ _]
+   {}))
+
+(rf/reg-event-fx
+ ::revoke-moderator-status-selected
+ (fn [{:keys [db]} [_ {:keys [target-occupant]}]]
+   {:xmpp/query
+    {:type :set
+     :content (set-muc-role-iq-content
+               {:nick (:occupant/nickname target-occupant)
+                :role :participant})
+     :from (:connection/full-jid db)
+     :to (:occupant/room-jid target-occupant)
+     :on-result [::revoke-moderator-status-result-received]}}))
+
+(rf/reg-event-fx
+ ::revoke-moderator-status-result-received
+ (fn [_ _]
+   {}))
+
+(rf/reg-event-fx
+ ::ban-selected
+ (fn [{:keys [db]} [_ {:keys [target-occupant]}]]
+   {:xmpp/query
+    {:type :set
+     :content (set-muc-affiliation-iq-content
+               {:jid (:occupant/bare-jid target-occupant)
+                :affiliation :outcast})
+     :from (:connection/full-jid db)
+     :to (:occupant/room-jid target-occupant)
+     :on-result [::ban-result-received]}}))
+
+(rf/reg-event-fx
+ ::ban-result-received
  (fn [_ _]
    {}))

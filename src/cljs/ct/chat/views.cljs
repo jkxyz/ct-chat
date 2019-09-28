@@ -99,7 +99,8 @@
             name (occupant-name @occupant)]
         [:span.message-status-body
          (case action
-           :kicked (str name " was kicked by " actor-name))]))))
+           :kicked (str name " was kicked by " actor-name)
+           :banned (str name " was banned"))]))))
 
 (defn- message-container
   [{:message/keys [type from-username from-nickname body] :as message}]

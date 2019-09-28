@@ -27,7 +27,7 @@
 
 (rf/reg-sub
  ::current-room-available-occupants-sorted
- :<= [::current-room-available-occupants]
+ :<- [::current-room-available-occupants]
  (fn [occupants]
    (->> occupants
         (sort-by (some-fn :occupant/username :occupant/nickname))

@@ -45,6 +45,18 @@
                          conj
                          (kicked-message presence-stanza occupant)))))
 
+(defn- self-banned-message [occupant]
+  {:message/type :status
+   :message/id (str (random-uuid))
+   :message/action :banned
+   :message/occupant-jid (:occupant/occupant-jid occupant)})
+
+(defn- append-self-banned-message [app-db occupant]
+  (let [{:occupant/keys [self? affiliation room-jid]} occupant]
+    (if (and self? (= :outcast affiliation))
+      (update-in app-db [:messages/messages room-jid] conj (self-banned-message))
+      app-db)))
+
 (rf/reg-event-fx
  ::room-presence-received
  (fn [{:keys [db]} [_ presence-stanza]]
@@ -52,7 +64,8 @@
          (muc-presence->occupant presence-stanza)]
      {:db (-> db
               (assoc-in [:rooms/occupants room-jid occupant-jid] occupant)
-              (append-kicked-message presence-stanza occupant))})))
+              (append-kicked-message presence-stanza occupant)
+              (append-self-banned-message occupant))})))
 
 (rf/reg-event-fx
  ::presence-listeners-ready

@@ -7,7 +7,7 @@
    [clojure.string :as string]
    [clojure.data.xml :as xml]
    [ct.chat.xmpp.jids :refer [jidparts bare-jid]]
-   [ct.chat.xmpp.xml :refer [tag= attr= children]]
+   [ct.chat.xmpp.xml :refer [xml tag= attr= children]]
    [ct.chat.xmpp.namespaces
     :refer [default-ns
             disco-items-ns
@@ -111,6 +111,8 @@
      :room/name (get-in identity [:attrs :name])}))
 
 (defn set-muc-role-iq-content [{:keys [nick role]}]
-  (xml/element (xml/qname muc-admin-ns :query)
-               {}
-               (xml/element :item {:nick nick :role (name role)})))
+  (xml [(xml/qname muc-admin-ns :query) [:item {:nick nick :role (name role)}]]))
+
+(defn set-muc-affiliation-iq-content [{:keys [affiliation jid]}]
+  (xml [(xml/qname muc-admin-ns :query)
+        [:item {:affiliation (name affiliation) :jid jid}]]))

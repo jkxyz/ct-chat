@@ -26,8 +26,8 @@
    :grant-voice "Grant voice"
    :revoke-voice "Revoke voice"
    :ban "Ban"
-   :assign-moderator-role "Assign moderator role"
-   :revoke-moderator-role "Revoke moderator role"})
+   :grant-moderator-status "Grant moderator status"
+   :revoke-moderator-status "Revoke moderator status"})
 
 (defn profile-panel []
   (let [occupant (rf/subscribe [::subs/occupant])
@@ -39,11 +39,9 @@
          [:div.profile-close-button {:on-click handle-close-button-click}]
          [:div.profile-image-container
           [:div.profile-image]]
-         [:a.profile-link-button
-          "View Profile"]
-         [:a.profile-link-button
-          "Send Message"]
-         (when (and (not= :none affiliation) (not= :participant role))
+         [:a.profile-link-button "View Profile"]
+         [:a.profile-link-button "Send Message"]
+         (when (or (not= :none affiliation) ((complement #{:visitor :participant}) role))
            [:div.profile-details
             (when-not (= :none affiliation)
               [:div.profile-detail

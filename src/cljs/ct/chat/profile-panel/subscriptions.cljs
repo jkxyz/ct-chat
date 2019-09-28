@@ -34,20 +34,20 @@
 
 (defn- can-revoke-moderator-role? [self-occupant target-occupant]
   (and (#{:admin :owner} (:occupant/affiliation self-occupant))
-       (= :moderator (:occupant/role target-occupant))
-       (or (= :owner (:occupant/role self-occupant))
-           (not= :owner (:occupant/role target-occupant)))))
+       (#{:none :member} (:occupant/affiliation target-occupant))
+       (= :moderator (:occupant/role target-occupant))))
 
 (rf/reg-sub
  ::available-actions
  :<- [::self-occupant]
  :<- [::occupant]
  (fn [[self target]]
-   (cond-> []
-     (can-kick? self target) (conj :kick)
-     (can-grant-voice? self target) (conj :grant-voice)
-     (can-revoke-voice? self target) (conj :revoke-voice)
-     (can-ban? self target) (conj :ban)
-     (can-assign-moderator-role? self target) (conj :assign-moderator-role)
-     (can-revoke-moderator-role? self target) (conj :revoke-moderator-role)
-     :always (seq))))
+   (when target
+     (cond-> []
+       (can-kick? self target) (conj :kick)
+       (can-grant-voice? self target) (conj :grant-voice)
+       (can-revoke-voice? self target) (conj :revoke-voice)
+       (can-ban? self target) (conj :ban)
+       (can-assign-moderator-role? self target) (conj :grant-moderator-status)
+       (can-revoke-moderator-role? self target) (conj :revoke-moderator-status)
+       :always (not-empty)))))
