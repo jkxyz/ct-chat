@@ -33,10 +33,12 @@
          target-occupant (get-in (:rooms/occupants db) [chat-jid occupant-jid])]
      {:dispatch
       (case type
-        :kick [::kick-occupant {:target-occupant target-occupant}])})))
+        :kick [::kick-occupant-selected {:target-occupant target-occupant}]
+        :revoke-voice [::revoke-voice-selected {:target-occupant target-occupant}]
+        :grant-voice [::grant-voice-selected {:target-occupant target-occupant}])})))
 
 (rf/reg-event-fx
- ::kick-occupant
+ ::kick-selected
  (fn [{:keys [db]} [_ {:keys [target-occupant]}]]
    {:xmpp/query
     {:type :set
@@ -46,3 +48,42 @@
      :from (:connection/full-jid db)
      :to (:occupant/room-jid target-occupant)
      :on-result [::kick-occupant-result-received]}}))
+
+(rf/reg-event-fx
+ ::kick-occupant-result-received
+ (fn [_ _]
+   {}))
+
+(rf/reg-event-fx
+ ::revoke-voice-selected
+ (fn [{:keys [db]} [_ {:keys [target-occupant]}]]
+   {:xmpp/query
+    {:type :set
+     :content (set-muc-role-iq-content
+               {:nick (:occupant/nickname target-occupant)
+                :role :visitor})
+     :from (:connection/full-jid db)
+     :to (:occupant/room-jid target-occupant)
+     :on-result [::revoke-voice-result-received]}}))
+
+(rf/reg-event-fx
+ ::revoke-voice-result-received
+ (fn [_ _]
+   {}))
+
+(rf/reg-event-fx
+ ::grant-voice-selected
+ (fn [{:keys [db]} [_ {:keys [target-occupant]}]]
+   {:xmpp/query
+    {:type :set
+     :content (set-muc-role-iq-content
+               {:nick (:occupant/nickname target-occupant)
+                :role :participant})
+     :from (:connection/full-jid db)
+     :to (:occupant/room-jid target-occupant)
+     :on-result [::grant-voice-result-received]}}))
+
+(rf/reg-event-fx
+ ::grant-voice-result-received
+ (fn [_ _]
+   {}))

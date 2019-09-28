@@ -5,12 +5,12 @@
    [ct.chat.profile-panel.subscriptions :as subs]
    [ct.chat.profile-panel.events :as events]))
 
-(defn- profile-actions [{:keys [actions on-action]}]
+(defn- profile-actions [{:keys [on-action]}]
   (let [handle-input
         (fn [event]
           (on-action (keyword (.-target.value event)))
           (set! (.-target.value event) ""))]
-    (fn []
+    (fn [{:keys [actions]}]
       [:select.profile-actions
        {:default-value ""
         :on-input handle-input}
