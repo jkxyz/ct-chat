@@ -54,7 +54,7 @@
 (defn- append-self-banned-message [app-db occupant]
   (let [{:occupant/keys [self? affiliation room-jid]} occupant]
     (if (and self? (= :outcast affiliation))
-      (update-in app-db [:messages/messages room-jid] conj (self-banned-message))
+      (update-in app-db [:messages/messages room-jid] conj (self-banned-message occupant))
       app-db)))
 
 (rf/reg-event-fx
