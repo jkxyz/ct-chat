@@ -20,4 +20,5 @@
 
 (defn presence->producer [presence-stanza]
   (when-let [producer (select presence-stanza (tag= (xml/qname ::media :producer)))]
-    {:producer/id (get-in producer [:attrs :id])}))
+    {:producer/id (get-in producer [:attrs :id])
+     :producer/occupant-jid (get-in presence-stanza [:attrs :jid])}))

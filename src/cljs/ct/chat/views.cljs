@@ -4,7 +4,6 @@
    [re-frame.core :as rf]
    [reagent.core :as reagent]
    [ct.chat.xmpp.jids :refer [jidparts bare-jid]]
-   [ct.chat.media.device :refer [consumers]]
    [ct.chat.events :as events]
    [ct.chat.messages.events :as messages.events]
    [ct.chat.rooms.subscriptions :as rooms.subs]
@@ -12,7 +11,8 @@
    [ct.chat.chats.subscriptions :as chats.subs]
    [ct.chat.media.subscriptions :as media.subs]
    [ct.chat.subscriptions :as subs]
-   [ct.chat.profile-panel.views :refer [profile-panel]]))
+   [ct.chat.profile-panel.views :refer [profile-panel]]
+   [ct.chat.media.views :refer [broadcast-button]]))
 
 (defn- input []
   (let [!input (atom nil)
@@ -58,30 +58,30 @@
        (for [{:occupant/keys [occupant-jid] :as occupant} @occupants]
          ^{:key occupant-jid} [roster-user occupant])])))
 
-(defn- broadcast-button [_]
-  (let [handle-click #(rf/dispatch [::events/broadcast-button-clicked])]
-    (fn [{:keys [disabled?]}]
-      [:button.broadcast-button {:disabled disabled? :on-click handle-click}
-       "Broadcast"])))
+;; (defn- broadcast-button [_]
+;;   (let [handle-click #(rf/dispatch [::events/broadcast-button-clicked])]
+;;     (fn [{:keys [disabled?]}]
+;;       [:button.broadcast-button {:disabled disabled? :on-click handle-click}
+;;        "Broadcast"])))
 
-(defn- stop-broadcasting-button []
-  (let [handle-click #(rf/dispatch [::events/stop-broadcasting-button-clicked])]
-    (fn []
-      [:button.stop-broadcasting-button {:on-click handle-click}
-       "Stop Broadcasting"])))
+;; (defn- stop-broadcasting-button []
+;;   (let [handle-click #(rf/dispatch [::events/stop-broadcasting-button-clicked])]
+;;     (fn []
+;;       [:button.stop-broadcasting-button {:on-click handle-click}
+;;        "Stop Broadcasting"])))
 
-(defn- broadcast []
-  (let [broadcast-state (rf/subscribe [::media.subs/broadcast-state])]
-    (fn []
-      [:div.broadcast-container
-       (if (or (nil? @broadcast-state) (= :preparing @broadcast-state))
-         [broadcast-button {:disabled? (= :preparing @broadcast-state)}]
-         [stop-broadcasting-button])])))
+;; (defn- broadcast []
+;;   (let [broadcast-state (rf/subscribe [::media.subs/broadcast-state])]
+;;     (fn []
+;;       [:div.broadcast-container
+;;        (if (or (nil? @broadcast-state) (= :preparing @broadcast-state))
+;;          [broadcast-button {:disabled? (= :preparing @broadcast-state)}]
+;;          [stop-broadcasting-button])])))
 
 (defn- sidebar []
   [:div.sidebar-container
    #_[rooms]
-   [broadcast]
+   [:div.broadcast-container [broadcast-button]]
    [roster]])
 
 (defn- occupant-name [{:occupant/keys [username nickname]}] (or username nickname))
@@ -158,10 +158,7 @@
      {:display-name "webcam"
       :component-did-mount
       (fn []
-        (let [consumer (@consumers consumer-id)]
-          (set! (.-srcObject @!video) (js/window.MediaStream. #js [(.-track consumer)]))
-          (set! (.-volume @!video) 0)
-          (.play @!video)))
+        )
       :reagent-render
       (fn []
         [:div.webcam

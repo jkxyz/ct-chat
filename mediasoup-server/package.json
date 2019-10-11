@@ -3,6 +3,7 @@
     "dependencies": {
         "express": "4.17.1",
         "uuid": "3.3.2",
-        "lodash": "4.17.15"
+        "lodash": "4.17.15",
+        "helmet": "3.21.1"
     }
 }

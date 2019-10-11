@@ -1,9 +1,17 @@
 (ns ct.chat.media.events
   (:require
    [re-frame.core :as rf]
+   [day8.re-frame.http-fx]
+   [ajax.core :as ajax]
    [ct.chat.xmpp.stanzas.muc :refer [muc-presence?]]
    [ct.chat.xmpp.stanzas.media :refer [presence->producer]]
    [ct.chat.media.effects :as fx]))
+
+(rf/reg-event-fx
+ ::error
+ (fn [_ [_ message]]
+   (js/window.alert (str "Error: " message))
+   {}))
 
 (rf/reg-event-fx
  ::initialize
@@ -15,9 +23,64 @@
 
 (rf/reg-event-fx
  ::room-presence-received
- (fn [_ [_ presence-stanza]]
+ (fn [{:keys [db]} [_ presence-stanza]]
    (when-let [producer (presence->producer presence-stanza)]
-     {})))
+     (let [{:producer/keys [occupant-jid]} producer]
+       {:db (assoc-in db [:media/producers occupant-jid] producer)}))))
+
+;; BROADCASTING
+;; ============
+
+
+
+
+
+
+
+
+
+;; (rf/reg-event-fx
+;;  ::broadcast-button-clicked
+;;  (fn [_ _]
+;;    {:http-xhrio
+;;     {:method :get
+;;      :uri "http://localhost:3500/capabilities"
+;;      :response-format (ajax/raw-response-format)
+;;      :on-success [::capabilities-response-received]
+;;      :on-failure [::error "Could not get capabilities"]}}))
+
+;; (rf/reg-event-fx
+;;  ::capabilities-response-received
+;;  (fn [_ [_ response-body]]
+;;    {::fx/load-device
+;;     {:capabilities (js/window.JSON.parse response-body)
+;;      :on-loaded [::device-loaded]}}))
+
+;; (rf/reg-event-fx
+;;  ::device-loaded
+;;  (fn [_ _]
+;;    {:http-xhrio
+;;     {:method :post
+;;      :uri "http://localhost:3500/transports"
+;;      :format (ajax/text-request-format)
+;;      :response-format (ajax/json-response-format {:keywords? true})
+;;      :on-success [::server-send-transport-created]
+;;      :on-failure [::error "Could not create send transport"]}}))
+
+;; (rf/reg-event-fx
+;;  ::server-send-transport-created
+;;  (fn [{:keys [db]} [_ response]]
+;;    {:db (assoc db :media/send-transport-id (:id response))
+;;     ::fx/create-send-transport
+;;     {:parameters (clj->js response)
+;;      :on-connect [::send-transport-connecting]}}))
+
+
+
+
+
+
+
 
 ;; (rf/reg-event-fx
 ;;  ::initialize

@@ -1,4 +1,5 @@
 const express = require('express');
+const helmet = require('helmet');
 const mediasoup = require('mediasoup');
 const _ = require('lodash');
 
@@ -65,7 +66,10 @@ const transports = new Map();
 async function createTransport (router) {
     const transport = await router.createWebRtcTransport(webRtcTransportOptions);
     transports.set(transport.id, transport);
-    transport.on('close', () => { transports.delete(transport.id); });
+    transport.observer.on('close', () => {
+        transports.delete(transport.id);
+        console.log('Closed transport ID:', transport.id);
+    });
     return transport;
 }
 
@@ -75,7 +79,14 @@ async function main () {
 
     const app = express();
 
+    app.use(helmet({ hsts: false }));
     app.use(express.json());
+
+    app.use((req, res, next) => {
+        // TODO: Configure for security
+        res.header('Access-Control-Allow-Origin', '*');
+        next();
+    });
 
     app.get('/capabilities', (req, res) => {
         res.status(200).json(router.rtpCapabilities);
