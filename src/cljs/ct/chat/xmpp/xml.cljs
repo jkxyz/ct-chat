@@ -14,7 +14,7 @@
 
 (defn attr= [a v] (attrp a (partial = v)))
 
-(defn select [el & selectors] (sequence (apply comp selectors) [el]))
+(defn select [el & selectors] (seq (sequence (apply comp selectors) [el])))
 
 (defn xml [[tag ?attrs & content]]
   (let [content (remove nil? (if (map? ?attrs) content (concat [?attrs] content)))

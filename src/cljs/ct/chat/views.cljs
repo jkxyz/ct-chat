@@ -58,26 +58,6 @@
        (for [{:occupant/keys [occupant-jid] :as occupant} @occupants]
          ^{:key occupant-jid} [roster-user occupant])])))
 
-;; (defn- broadcast-button [_]
-;;   (let [handle-click #(rf/dispatch [::events/broadcast-button-clicked])]
-;;     (fn [{:keys [disabled?]}]
-;;       [:button.broadcast-button {:disabled disabled? :on-click handle-click}
-;;        "Broadcast"])))
-
-;; (defn- stop-broadcasting-button []
-;;   (let [handle-click #(rf/dispatch [::events/stop-broadcasting-button-clicked])]
-;;     (fn []
-;;       [:button.stop-broadcasting-button {:on-click handle-click}
-;;        "Stop Broadcasting"])))
-
-;; (defn- broadcast []
-;;   (let [broadcast-state (rf/subscribe [::media.subs/broadcast-state])]
-;;     (fn []
-;;       [:div.broadcast-container
-;;        (if (or (nil? @broadcast-state) (= :preparing @broadcast-state))
-;;          [broadcast-button {:disabled? (= :preparing @broadcast-state)}]
-;;          [stop-broadcasting-button])])))
-
 (defn- sidebar []
   [:div.sidebar-container
    #_[rooms]

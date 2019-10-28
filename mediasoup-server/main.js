@@ -85,6 +85,12 @@ async function main () {
     app.use((req, res, next) => {
         // TODO: Configure for security
         res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', '*');
+        next();
+    });
+
+    app.use((req, res, next) => {
+        console.log(req.method, req.originalUrl);
         next();
     });
 
@@ -108,6 +114,7 @@ async function main () {
     app.post('/transports/:id/connect', async (req, res) => {
         const transport = transports.get(req.params.id);
         if (transport) {
+            console.log('Connection parameters:', req.body);
             await transport.connect(_.pick(req.body, ['dtlsParameters']));
             res.status(200).json({});
         } else {
