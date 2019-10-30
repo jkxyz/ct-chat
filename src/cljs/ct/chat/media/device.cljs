@@ -4,7 +4,7 @@
    [ajax.core :as ajax]
    [mediasoup-client :as mediasoup]))
 
-(defonce ^:private user-media-stream (atom nil))
+(defonce user-media-stream (atom nil))
 
 (def ^:private user-media-constraints #js {:video true :audio true})
 

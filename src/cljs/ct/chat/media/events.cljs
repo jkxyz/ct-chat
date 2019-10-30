@@ -34,7 +34,7 @@
 ;; ============
 
 (rf/reg-event-fx
- ::broadcast-button-clicked
+ ::start-broadcast-button-clicked
  (fn [_ _]
    {::fx/request-user-media
     {:on-ready [::user-media-ready]
@@ -52,8 +52,9 @@
           :chats/keys [chats active-chat-jid]}
          db]
      {:db (assoc db
-                :media/video-producer-id video-producer-id
-                :media/audio-producer-id audio-producer-id)
+                 :media/broadcasting? true
+                 :media/video-producer-id video-producer-id
+                 :media/audio-producer-id audio-producer-id)
       :xmpp/send
       {:stanza (media-presence-stanza
                 {:from full-jid

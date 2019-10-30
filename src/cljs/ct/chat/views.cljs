@@ -12,7 +12,9 @@
    [ct.chat.media.subscriptions :as media.subs]
    [ct.chat.subscriptions :as subs]
    [ct.chat.profile-panel.views :refer [profile-panel]]
-   [ct.chat.media.views :refer [broadcast-button]]))
+   [ct.chat.media.views
+    :refer [broadcast-button
+            webcam-preview]]))
 
 (defn- input []
   (let [!input (atom nil)
@@ -59,10 +61,14 @@
          ^{:key occupant-jid} [roster-user occupant])])))
 
 (defn- sidebar []
-  [:div.sidebar-container
-   #_[rooms]
-   [:div.broadcast-container [broadcast-button]]
-   [roster]])
+  (let [broadcasting? (rf/subscribe [::media.subs/broadcasting?])]
+    (fn []
+      [:div.sidebar-container
+       [:div.broadcast-container
+        (when @broadcasting?
+          [webcam-preview])
+        [broadcast-button]]
+       [roster]])))
 
 (defn- occupant-name [{:occupant/keys [username nickname]}] (or username nickname))
 
@@ -132,32 +138,12 @@
         (for [{:chat/keys [jid] :as chat} @chats]
           ^{:key jid} [chat-tab {:chat chat :active? (= @active-chat-jid jid)}]))])))
 
-(defn webcam [{:keys [consumer-id]}]
-  (let [!video (atom nil)]
-    (reagent/create-class
-     {:display-name "webcam"
-      :component-did-mount
-      (fn []
-        )
-      :reagent-render
-      (fn []
-        [:div.webcam
-         [:video.webcam-video {:ref (partial reset! !video)}]])})))
-
-(defn webcams []
-  (let [consumer-ids (rf/subscribe [::media.subs/consumer-ids])]
-    (fn []
-      [:div.webcams-container
-       (for [consumer-id @consumer-ids]
-         ^{:key consumer-id} [webcam {:consumer-id consumer-id}])])))
-
 (defn app []
   (let [active-chat (rf/subscribe [::chats.subs/active-chat])]
     (fn []
       (if-not @active-chat
         [:div.loader-container [:div.loader "Loading..."]]
         [:div.chat-container
-         [webcams]
          [chat-tabs]
          [:div.messages-and-roster-container
           [autoscrolling-messages]
