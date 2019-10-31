@@ -323,3 +323,18 @@ body {
   width: 100%;
   height: 100%;
 }
+
+.webcams-container {
+  position: absolute;
+}
+
+.webcam-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 150px;
+}
+
+.webcam-video {
+  width: 100%;
+}

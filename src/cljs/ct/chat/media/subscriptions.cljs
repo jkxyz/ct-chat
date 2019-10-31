@@ -6,3 +6,9 @@
  ::broadcasting?
  (fn [{:media/keys [broadcasting?]}]
    broadcasting?))
+
+(rf/reg-sub
+ ::video-producers
+ (fn [{:media/keys [producers]}]
+   (->> (mapcat val producers)
+        (filter #(= :video (:producer/kind %))))))

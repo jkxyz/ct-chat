@@ -14,7 +14,8 @@
    [ct.chat.profile-panel.views :refer [profile-panel]]
    [ct.chat.media.views
     :refer [broadcast-button
-            webcam-preview]]))
+            webcam-preview
+            webcams]]))
 
 (defn- input []
   (let [!input (atom nil)
@@ -144,6 +145,7 @@
       (if-not @active-chat
         [:div.loader-container [:div.loader "Loading..."]]
         [:div.chat-container
+         [webcams]
          [chat-tabs]
          [:div.messages-and-roster-container
           [autoscrolling-messages]

@@ -132,7 +132,12 @@ async function main () {
             res
                 .status(201)
                 .location(`/transports/${transport.id}/consumers/${consumer.id}`)
-                .json(_.pick(consumer, ['id', 'kind', 'rtpParameters']));
+                .json(_.pick(consumer, [
+                    'id',
+                    'producerId',
+                    'kind',
+                    'rtpParameters'
+                ]));
         } else {
             res.status(404).json({ error: 'Resource not found' });
         }

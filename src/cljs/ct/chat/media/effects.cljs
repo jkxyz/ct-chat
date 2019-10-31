@@ -4,7 +4,9 @@
    [re-frame.core :as rf]
    [ct.chat.media.device
     :refer [request-user-media!
-            start-broadcasting!]]))
+            start-broadcasting!
+            start-consuming!
+            consume!]]))
 
 (rf/reg-fx
  ::request-user-media
@@ -19,3 +21,8 @@
  (fn [{:keys [on-ready]}]
    (go
      (rf/dispatch (conj on-ready (<! (start-broadcasting!)))))))
+
+(rf/reg-fx
+ ::start-consuming
+ (fn [_]
+   (start-consuming!)))

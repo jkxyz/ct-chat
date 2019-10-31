@@ -21,14 +21,17 @@
    {:xmpp/add-listener
     {:id ::room-presence-listener
      :xform (filter muc-presence?)
-     :on-message [::room-presence-received]}}))
+     :on-message [::room-presence-received]}
+    ;; TODO: Don't open transport until first producer received
+    ::fx/start-consuming nil}))
 
 (rf/reg-event-fx
  ::room-presence-received
  (fn [{:keys [db]} [_ presence-stanza]]
-   (when-let [producers (presence->producers presence-stanza)]
-     (let [occupant-jid (get-in presence-stanza [:attrs :from])]
-       {:db (assoc-in db [:media/producers occupant-jid] producers)}))))
+   (let [occupant-jid (get-in presence-stanza [:attrs :from])]
+     (if-let [producers (presence->producers presence-stanza)]
+       {:db (assoc-in db [:media/producers occupant-jid] producers)}
+       {:db (update db :media/producers dissoc occupant-jid)}))))
 
 ;; BROADCASTING
 ;; ============

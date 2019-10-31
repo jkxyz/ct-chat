@@ -128,11 +128,62 @@
         (.then #(put! ch %)))
     ch))
 
+(defonce ^:private video-producer (atom nil))
+
+(defonce ^:private audio-producer (atom nil))
+
 (defn start-broadcasting! []
   (go
-    (<! (load-device! (<! (get-capabilities))))
+    (when-not @device (<! (load-device! (<! (get-capabilities)))))
     (create-send-transport! (<! (create-server-transport!)))
-    (let [video-producer (<! (produce-video!))
-          audio-producer (<! (produce-audio!))]
-      {:video-producer-id (.-id video-producer)
-       :audio-producer-id (.-id audio-producer)})))
+    (let [new-video-producer (<! (produce-video!))
+          new-audio-producer (<! (produce-audio!))]
+      (reset! video-producer new-video-producer)
+      (reset! audio-producer new-audio-producer)
+      {:video-producer-id (.-id new-video-producer)
+       :audio-producer-id (.-id new-audio-producer)})))
+
+(defonce ^:private receive-transport (atom nil))
+
+(defn- create-receive-transport! [parameters]
+  (let [transport (.createRecvTransport @device (clj->js parameters))]
+    (.on transport
+         "connect"
+         (fn [parameters callback errback]
+           (go
+             (if (<! (connect-server-transport! (.-id transport) parameters))
+               (callback)
+               (errback)))))
+    (reset! receive-transport transport)))
+
+(defn start-consuming! []
+  (go
+    (when-not @device (<! (load-device! (<! (get-capabilities)))))
+    (create-receive-transport! (<! (create-server-transport!)))))
+
+(defn- create-server-consumer! [transport-id producer-id]
+  (let [ch (chan)]
+    (ajax/ajax-request
+     {:uri (str "http://localhost:3500/transports/" transport-id "/consumers")
+      :method :post
+      :format (ajax/json-request-format)
+      :response-format (ajax/raw-response-format)
+      :params {:producerId producer-id}
+      :handler
+      (fn [[ok response]]
+        (if ok
+          (put! ch (js/window.JSON.parse response))
+          (close! ch)))})
+    ch))
+
+(defonce consumers (atom {}))
+
+(defn consume! [producer-id]
+  (go
+    (let [parameters (<! (create-server-consumer! (.-id @receive-transport) producer-id))
+          consumer-ch (chan)]
+      (-> (.consume @receive-transport parameters)
+          (.then #(put! consumer-ch %)))
+      (let [consumer (<! consumer-ch)]
+        (swap! consumers assoc (.-id consumer) consumer)
+        consumer))))
