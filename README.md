@@ -24,17 +24,25 @@ $ yarn install
 $ yarn webpack
 ```
 
-To start ejabberd, Postgres, and the media server:
+To setup and start ejabberd, Postgres, and the media server:
 
 ```
 # Make appropriate changes to environment variables in .env
 $ cp .env.sample .env
 
+# Building the mediasoup image will take some time
 $ docker-compose up --build -d
+
 $ ./docker/init_ejabberd.sh
 ```
 
-To start the Figwheel compiler:
+To compile sass sources:
+
+```
+$ lein sass4clj once
+```
+
+To start the Figwheel ClojureScript compiler:
 
 ```
 $ lein figwheel
@@ -49,3 +57,23 @@ To compile sass sources and watch for changes:
 ```
 $ lein sass4clj auto
 ```
+
+### MediaSoup
+
+[MediaSoup][mediasoup] is a WebRTC Selective Forwarding Unit and media server.
+
+It's recommended to run the MediaSoup server in a Docker container. This is
+because installing the `mediasoup` package compiles a C++ extension which
+requires a large number of system dependencies. The `mediasoup` package is
+omitted from `mediasoup-server/package.json` and will be installed when building
+the Docker image.
+
+To install new Node packages:
+
+```
+$ docker-compose exec mediasoup npm install --save ...PACKAGES
+$ docker-compose exec mediasoup cat package.json > mediasoup-server/package.json
+$ docker-compose exec mediasoup cat package-lock.json > mediasoup-server/package-lock.json
+```
+
+[mediasoup]: https://mediasoup.org/
