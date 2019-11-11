@@ -20,6 +20,7 @@ services:
   mediasoup:
     build: ./mediasoup-server/
     environment:
+      - "LOG_LEVEL=debug"
       - "DEBUG=mediasoup*"
       - "MEDIASOUP_TRANSPORT_ANNOUNCED_IP"
     ports:

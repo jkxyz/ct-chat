@@ -51,7 +51,8 @@
                          :password password
                          :roomJid "test-room@chat"
                          :serverJid "localhost"
-                         :websocketUri "ws://localhost:5443/ws/"}]
+                         :websocketUri "ws://localhost:5443/ws/"
+                         :mediaWebSocketUri "ws://localhost:3500/"}]
        (format "window.ct.chat.initialize(%s);"
                (json/generate-string chat-options)))]]))
 

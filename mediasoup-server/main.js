@@ -1,164 +1,174 @@
-const express = require('express');
-const helmet = require('helmet');
-const mediasoup = require('mediasoup');
 const _ = require('lodash');
+const uuid = require('uuid/v4');
+const winston = require('winston');
+const http = require('http');
+const protoo = require('protoo-server');
+const mediasoup = require('mediasoup');
 
-const workerOptions = {
-    logLevel: 'debug',
-    rtcMinPort: 10000,
-    rtcMaxPort: 10100
-};
+const {
+  logLevel,
+  webSocketServerOptions,
+  workerOptions,
+  routerOptions,
+  webRtcTransportOptions
+} = require('./options');
 
-const routerOptions = {
-    mediaCodecs: [
-        {
-            kind: 'audio',
-            mimeType: 'audio/opus',
-            clockRate: 48000,
-            channels: 2
-        },
-        {
-            kind: 'video',
-            mimeType: 'video/VP8',
-            clockRate: 90000,
-            parameters: {
-                'x-google-start-bitrate': 1000
-            }
-        },
-        {
-            kind: 'video',
-            mimeType: 'video/VP9',
-            clockRate: 90000,
-            parameters: {
-                'profile-id': 2,
-                'x-google-start-bitrate': 1000
-            }
-        },
-        {
-            kind: 'video',
-            mimeType: 'video/h264',
-            clockRate: 90000,
-            parameters: {
-                'packetization-mode': 1,
-                'profile-level-id': '42e01f',
-                'level-asymmetry-allowed': 1,
-                'x-google-start-bitrate': 1000
-            }
-        }
-    ]
-};
+const logger = winston.createLogger({
+  level: logLevel,
+  transports: [new winston.transports.Console()],
+  format: winston.format.simple()
+});
 
-const transportAnnouncedIp = process.env.MEDIASOUP_TRANSPORT_ANNOUNCED_IP;
+const requestHandlers = {
+  capabilities ({ router }, request, accept, reject) {
+    accept(router.rtpCapabilities);
+    logger.log('debug', 'Response', router.rtpCapabilities);
+  },
 
-const webRtcTransportOptions = {
-    listenIps: [{ ip: '0.0.0.0', announcedIp: transportAnnouncedIp }],
-    initialAvailableOutgoingBitrate: 1000000,
-    minimumAvailableOutgoingBirtate: 600000,
-    maxSctpMessageSize: 262144,
-    maxIncomingBitrate: 1500000,
-    enableUdp: true,
-    enableTcp: true,
-    preferUdp: true
-};
+  async createTransport ({ router, peer }, request, accept, reject) {
+    const transportType = request.data.type;
 
-const transports = new Map();
+    if (transportType !== 'send' && transportType !== 'receive') {
+      reject(400, 'Not a valid transport type');
+      return;
+    }
 
-async function createTransport (router) {
+    if (peer.data.transports[transportType]) {
+      reject(409, 'Transport type already exists');
+      return;
+    }
+
     const transport = await router.createWebRtcTransport(webRtcTransportOptions);
-    transports.set(transport.id, transport);
-    transport.observer.on('close', () => {
-        transports.delete(transport.id);
-        console.log('Closed transport ID:', transport.id);
+
+    peer.data.transports[transportType] = transport;
+
+    const response = _.pick(transport, [
+      'id',
+      'iceParameters',
+      'iceCandidates',
+      'dtlsParameters'
+    ]);
+
+    accept(response);
+
+    logger.log('debug', 'Response', response);
+  },
+
+  async connectTransport ({ peer }, request, accept, reject) {
+    const transport = peer.data.transports[request.data.type];
+
+    if (!transport) {
+      reject(400, 'Transport type not created');
+      return;
+    }
+
+    await transport.connect(_.pick(request.data.parameters, ['dtlsParameters']));
+
+    logger.log('debug', 'Connected transport');
+
+    accept();
+  },
+
+  async createProducer ({ peer }, request, accept, reject) {
+    const transport = peer.data.transports.send;
+
+    if (!transport) {
+      reject(400, 'Send transport not created');
+      return;
+    }
+
+    const producer = await transport.produce(_.pick(request.data.parameters, [
+      'kind',
+      'rtpParameters'
+    ]));
+
+    logger.log('debug', 'Created producer');
+
+    const response = { id: producer.id };
+
+    accept(response);
+
+    logger.log('debug', 'Response', response);
+  },
+
+  async createConsumer ({ router, peer }, request, accept, reject) {
+    const transport = peer.data.transports.receive;
+
+    if (!transport) {
+      reject(400, 'Receive transport not created');
+      return;
+    }
+
+    const consumer = await transport.consume({
+      producerId: request.data.producerId,
+      rtpCapabilities: router.rtpCapabilities
     });
-    return transport;
+
+    logger.log('debug', 'Created consumer');
+
+    const response = _.pick(consumer, [
+      'id',
+      'producerId',
+      'kind',
+      'rtpParameters'
+    ]);
+
+    accept(response);
+
+    logger.log('debug', 'Response', response);
+  }
+};
+
+function handlePeerRequest (env, request, accept, reject) {
+  if (request.method in requestHandlers) {
+    requestHandlers[request.method](env, request, accept, reject);
+  } else {
+    reject(400, 'Not a valid request type');
+  }
+}
+
+async function handleConnectionRequest (
+  { router, room },
+  info,
+  accept,
+  reject
+) {
+  const transport = accept();
+
+  logger.log('debug', 'Accepted connection request');
+
+  const peer = await room.createPeer(uuid(), transport);
+
+  peer.data.transports = {};
+
+  peer.on('request', (request, accept, reject) => {
+    logger.log('debug', 'Request received', { request });
+    handlePeerRequest({ router, room, peer }, request, accept, reject);
+  });
+
+  peer.on('close', () => {
+    logger.log('debug', 'Peer closed');
+  });
 }
 
 async function main () {
-    const worker = await mediasoup.createWorker(workerOptions);
-    const router = await worker.createRouter(routerOptions);
+  const worker = await mediasoup.createWorker(workerOptions);
+  const router = await worker.createRouter(routerOptions);
 
-    const app = express();
+  const httpServer = http.createServer();
+  const protooServer = new protoo.WebSocketServer(httpServer, webSocketServerOptions);
 
-    app.use(helmet({ hsts: false }));
-    app.use(express.json());
+  const room = new protoo.Room();
 
-    app.use((req, res, next) => {
-        // TODO: Configure for security
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Headers', '*');
-        next();
-    });
+  protooServer.on('connectionrequest', (info, accept, reject) => {
+    logger.log('debug', 'Connection request');
+    handleConnectionRequest({ router, room }, info, accept, reject);
+  });
 
-    app.use((req, res, next) => {
-        console.log(req.method, req.originalUrl);
-        next();
-    });
-
-    app.get('/capabilities', (req, res) => {
-        res.status(200).json(router.rtpCapabilities);
-    });
-
-    app.post('/transports', async (req, res) => {
-        const transport = await createTransport(router);
-        res
-            .status(201)
-            .location(`/transports/${transport.id}`)
-            .json(_.pick(transport, [
-                'id',
-                'iceParameters',
-                'iceCandidates',
-                'dtlsParameters'
-            ]));
-    });
-
-    app.post('/transports/:id/connect', async (req, res) => {
-        const transport = transports.get(req.params.id);
-        if (transport) {
-            console.log('Connection parameters:', req.body);
-            await transport.connect(_.pick(req.body, ['dtlsParameters']));
-            res.status(200).json({});
-        } else {
-            res.status(404).json({ error: 'Resource not found' });
-        }
-    });
-
-    app.post('/transports/:id/consumers', async (req, res) => {
-        const transport = transports.get(req.params.id);
-        if (transport) {
-            const consumer = await transport.consume({
-                producerId: req.body.producerId,
-                rtpCapabilities: router.rtpCapabilities
-            });
-            res
-                .status(201)
-                .location(`/transports/${transport.id}/consumers/${consumer.id}`)
-                .json(_.pick(consumer, [
-                    'id',
-                    'producerId',
-                    'kind',
-                    'rtpParameters'
-                ]));
-        } else {
-            res.status(404).json({ error: 'Resource not found' });
-        }
-    });
-
-    app.post('/transports/:id/producers', async (req, res) => {
-        const transport = transports.get(req.params.id);
-        if (transport) {
-            const producer = await transport.produce(req.body);
-            res
-                .status(201)
-                .location(`/transports/${transport.id}/producers/${producer.id}`)
-                .json({ id: producer.id });
-        } else {
-            res.status(404).json({ error: 'Resource not found' });
-        }
-    });
-
-    app.listen(3500, () => {
-        console.log('Listening on port 3500');
-    });
+  httpServer.listen(3500, () => {
+    logger.log('info', 'Listening on port 3500');
+    logger.log('debug', 'webRtcTransportOptions', { webRtcTransportOptions });
+  });
 }
 
 main();

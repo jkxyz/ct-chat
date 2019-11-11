@@ -2,7 +2,7 @@
   (:require
    [cljs.core.async :refer [chan mult put!]]
    [clojure.data.xml :as xml]
-   [re-frame.core :as rf]))
+   ))
 
 (defonce ^:private connection (atom nil))
 

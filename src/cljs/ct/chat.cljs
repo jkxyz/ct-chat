@@ -13,7 +13,7 @@
 (defn- jid->nickname [jid] (first (string/split jid "@")))
 
 (defn ^:export initialize [options]
-  (let [{:keys [jid password roomJid serverJid websocketUri]}
+  (let [{:keys [jid password roomJid serverJid websocketUri mediaWebSocketUri]}
         (js->clj options :keywordize-keys true)]
     (rf/dispatch-sync
      [::events/initialize
@@ -23,5 +23,5 @@
        :connection/websocket-uri websocketUri
        :rooms/default-room-jid roomJid
        :rooms/default-nickname (jid->nickname jid)
-       :media/signalling-websocket-uri "ws://localhost:3500/"}])
+       :media/websocket-uri mediaWebSocketUri}])
     (mount-root)))
