@@ -23,5 +23,5 @@
        :connection/websocket-uri websocketUri
        :rooms/default-room-jid roomJid
        :rooms/default-nickname (jid->nickname jid)
-       :media/websocket-uri mediaWebSocketUri}])
+       :media/signalling-websocket-uri mediaWebSocketUri}])
     (mount-root)))

@@ -108,7 +108,7 @@
 
 (defn consume! [producer-id]
   (go
-    (let [parameters (<! (request! :createConsumer {:producerId producer-id}))
+    (let [parameters (clj->js (<! (request! :createConsumer {:producerId producer-id})))
           consumer-ch (chan)]
       (-> (.consume @receive-transport parameters)
           (.then #(put! consumer-ch %)))
