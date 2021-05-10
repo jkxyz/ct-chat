@@ -3,7 +3,7 @@
     "dependencies": {
         "express": "^4.17.1",
         "helmet": "^3.21.2",
-        "lodash": "^4.17.15",
+        "lodash": "^4.17.21",
         "nodejs-websocket": "^1.7.2",
         "protoo-server": "^4.0.3",
         "uuid": "^3.3.3",
